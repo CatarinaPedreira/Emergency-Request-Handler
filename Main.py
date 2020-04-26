@@ -1,4 +1,6 @@
 import tkinter
+import sys
+
 board = tkinter.Tk()
 canvas = tkinter.Canvas(board, width=500, height=500)
 canvas.pack()
@@ -7,5 +9,8 @@ board.mainloop()
 
 
 def create_zones():
-    zone_a = [(),(),(),()]
+    n_agents = int(sys.stdin.readline())
+
+    zones = []
+
 
