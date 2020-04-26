@@ -32,7 +32,7 @@ def setup():
 
 
 def create_emergency():
-    # TODO
+    # TODO, create emergency in random coordinates (x,y)
     return Emergency(None, None, None, None, None, None, None)
 
 
@@ -40,7 +40,7 @@ def allocate_emergency(emer):
     emer.get_control_tower().allocate_emergency(emer)
 
 
-#########################################################################################################
+#######################################################################################################################
 
 create_board()
 setup()
