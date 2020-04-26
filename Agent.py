@@ -23,3 +23,6 @@ class Agent:
     def allocate_emergency(self, emergency):
         #TODO
         pass
+
+    # Manhattan distance formula, for (x1,x2) and (y1, y2):
+        # |x1 - x2| + |y1 - y2|
