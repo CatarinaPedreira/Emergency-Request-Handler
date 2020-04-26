@@ -13,3 +13,6 @@ class Emergency:
         self.gravity = gravity
         self.typeVehicle = type_vehicle
         self.description = description
+
+    def get_control_tower(self):
+        return self.controlTower
