@@ -6,6 +6,7 @@ from threading import Thread
 from AASMAProj.Agent import Agent
 from AASMAProj.Emergency import Emergency
 from AASMAProj.Hospital import Hospital
+from AASMAProj.MedicalVehicle import MedicalVehicle
 
 zones = []
 agents = []
@@ -34,8 +35,10 @@ def setup():
         hospital_groups[i] = [Hospital(None, 100, 10), Hospital(None, 150, 10), Hospital(None, 95, 10)]
         agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
         for group in hospital_groups:
-            for j in range(len(group)):
-                group[j].set_control_tower(agents[i])
+            for hosp in group:
+                hosp.set_control_tower(agents[i])
+                medical_vehicles = [MedicalVehicle(100, 100, "available", hosp)] * 20  # enough? or too much?
+                hosp.set_medical_vehicles(medical_vehicles)
 
 
 def create_emergency():

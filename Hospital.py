@@ -21,5 +21,8 @@ class Hospital:
     def set_control_tower(self, control_tower):
         self.controlTower = control_tower
 
+    def set_medical_vehicles(self, medical_vehicles):
+        self.medicalVehicles = medical_vehicles
+
     def update_curr_capacity(self, amount):
         self.currCapacity = self.currCapacity + amount
