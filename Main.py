@@ -16,8 +16,10 @@ hospital_groups = []
 def create_board():
     board = tkinter.Tk()
     canvas = tkinter.Canvas(board, width=500, height=500)
-    #TODO create four shapes for agents, hospitals around them, lines to differentiate zones maybe?
-    # Check how to draw cool baby ambulances
+    canvas.create_line(250, 0, 250, 500, fill="black")
+    canvas.create_line(0, 250, 500, 250, fill="black")
+    #TODO create shapes for agent in each zone, hospitals around them
+    # Check how to draw cool baby ambulances!
     canvas.pack()
     board.mainloop()
 
@@ -37,7 +39,7 @@ def setup():
         for group in hospital_groups:
             for hosp in group:
                 hosp.set_control_tower(agents[i])
-                medical_vehicles = [MedicalVehicle(100, 100, "available", hosp)] * 20  # enough? or too much?
+                medical_vehicles = [MedicalVehicle(100, 100, "available", hosp)] * 5  # enough?
                 hosp.set_medical_vehicles(medical_vehicles)
 
 
