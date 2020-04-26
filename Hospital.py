@@ -5,3 +5,6 @@ class Hospital:
         self.maxCapacity = max_capacity
         self.medicalVehicles = medical_vehicles
         self.currCapacity = 0
+
+    def set_control_tower(self, control_tower):
+        self.controlTower = control_tower
