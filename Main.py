@@ -3,14 +3,14 @@ import sys
 import time
 from threading import Thread
 
-from AASMAProj.Agent import Agent
-from AASMAProj.Emergency import Emergency
-from AASMAProj.Hospital import Hospital
+from Agent import Agent
+from Emergency import Emergency
+from Hospital import Hospital
 
-nAgents = int(sys.stdin.readline())
+nAgents = int(sys.stdin.readline()) # =4
 zones = []
-agents = []
-hospital_groups = []
+agents = [None, None, None, None]
+hospital_groups = [None, None, None, None]
 
 
 def create_board():
@@ -21,11 +21,13 @@ def create_board():
 
 
 def setup():
+    zones = [[(0,0), (250, 0), (0,250), (250,250)], [(250,0), (500, 0), (250,250), (500,250)], [(0,250), (250, 250), (0,500), (250,500)], [(250,250), (500, 250), (250,500), (500,500)]]
     for i in range(nAgents):
         # Hardcoded, depois podemos mudar
         hospital_groups[i] = [Hospital(None, 100, 10), Hospital(None, 150, 10), Hospital(None, 95, 10)]
-        zones[i] = [(), (), (), ()]  # todo fill this in
         agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
+
+    for i in range(nAgents):
         for group in hospital_groups:
             for j in range(len(group)):
                 group[j].set_control_tower(agents[i])
