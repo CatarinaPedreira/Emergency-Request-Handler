@@ -8,17 +8,19 @@ from Emergency import Emergency
 from Hospital import Hospital
 from MedicalVehicle import MedicalVehicle
 
+canvas = None
 zones = []
 agents = [None, None, None, None]
 hospital_groups = [[None], [None], [None], [None]]
 
 
 def create_board():
+    global canvas
     board = tkinter.Tk()
     canvas = tkinter.Canvas(board, width=500, height=500)
     canvas.create_line(250, 0, 250, 500, fill="black")
     canvas.create_line(0, 250, 500, 250, fill="black")
-    #TODO create shapes for agent in each zone, hospitals around them
+    # TODO create shapes for agents in each zone, hospitals around them
     # Check how to draw cool baby ambulances!
     canvas.pack()
     board.mainloop()
@@ -26,7 +28,8 @@ def create_board():
 
 def setup():
     global zones
-    zones = [[(0,0), (250, 0), (0,250), (250,250)], [(250,0), (500, 0), (250,250), (500,250)], [(0,250), (250, 250), (0,500), (250,500)], [(250,250), (500, 250), (250,500), (500,500)]]
+    zones = [[(0, 0), (250, 0), (0, 250), (250, 250)], [(250, 0), (500, 0), (250, 250), (500, 250)],
+             [(0, 250), (250, 250), (0, 500), (250, 500)], [(250, 250), (500, 250), (250, 500), (500, 500)]]
     for i in range(4):
         # Hardcoded hospitals, we can change it later
         hospital_groups[i] = [Hospital(None, 100, 10), Hospital(None, 150, 10), Hospital(None, 95, 10)]
