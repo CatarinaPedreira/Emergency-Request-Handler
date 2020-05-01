@@ -1,10 +1,17 @@
 class Hospital:
 
-    def __init__(self, control_tower, max_capacity, medical_vehicles):
+    def __init__(self, location, control_tower, max_capacity, medical_vehicles):
+        self.location = location
         self.controlTower = control_tower
         self.maxCapacity = max_capacity
         self.medicalVehicles = medical_vehicles
         self.currCapacity = max_capacity
+
+    def get_location(self):
+        return self.location
+
+    def set_location(self, location):
+        self.location = location
 
     def get_control_tower(self):
         return self.controlTower
