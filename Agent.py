@@ -34,8 +34,7 @@ class Agent:
 
         #  Filter the available ambulances and if they are suitable for that emergency
         for hospital in self.hospitals:
-            hospital_dist = abs(hospital.get_location()[0] - emergency.get_location()[0]) + abs(
-                hospital.get_location()[1] - emergency.get_location()[1])
+            hospital_dist = abs(hospital.get_location()[0] - emergency.get_location()[0]) + abs(hospital.get_location()[1] - emergency.get_location()[1])
             if hospital_dist < min_distance:
                 min_distance = hospital_dist
                 min_hospital = hospital
@@ -50,8 +49,7 @@ class Agent:
         min_distance = math.inf
         min_vehicle = None
         for possibility in possible_ambulances:
-            manhattan_dist = abs(possibility.get_location()[0] - emergency.get_location()[0]) + abs(
-                possibility.get_location()[1] - emergency.get_location()[1])
+            manhattan_dist = abs(possibility.get_location()[0] - emergency.get_location()[0]) + abs(possibility.get_location()[1] - emergency.get_location()[1])
             if manhattan_dist < min_distance:
                 min_distance = manhattan_dist
                 min_vehicle = possibility
