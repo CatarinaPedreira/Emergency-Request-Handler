@@ -23,6 +23,7 @@ class Agent:
     def add_emergency(self, emergency):
         self.emergencies.append(emergency)
 
+    # Not considering collaboration between agents yet
     def allocate_emergency(self, emergency):
 
         # Hardcoded values, change them later when we see medicine and fuel better
