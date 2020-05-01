@@ -1,6 +1,7 @@
 import tkinter
 import sys
 import time
+import math
 from threading import Thread
 
 from Agent import Agent
@@ -27,7 +28,32 @@ def create_board():
 
 
 def setup():
+    # line = 'Agents=x Hospitals/zone=x Ambulances/zone=x Emergencies-frequency=x'
+    #line = (sys.stdin.readline()).split(' ')
+    #nAgents = int(line[0])
+    #nHospitals = int(line[1])
+    #medical_vehicles = int(line[2])
+    #emer_frequency = int(line[3])
+
     global zones
+
+    #for i in range(int(math.sqrt(nAgents)), 0, -1):
+    #    if nAgents % i == 0:
+    #        nRows = i
+    #        nColumns = nAgents//i
+    #        for m in range (nRows):
+    #            zones += [],
+    #            for n in range(nColumns):
+    #                zones[m] += [(), (), (), ()],
+    #                zones[m][n][0] = (1000/nRows*m, 1000/nColumns*n)
+    #                zones[m][n][1] = (1000/nRows*m, 1000/nColumns*(n+1))
+    #                zones[m][n][2] = (1000/nRows*(m+1), 1000/nColumns*n)
+    #                zones[m][n][3] = (1000/nRows*(m+1), 1000/nColumns*(n+1))
+    #        break
+
+
+
+
     zones = [[(0, 0), (250, 0), (0, 250), (250, 250)], [(250, 0), (500, 0), (250, 250), (500, 250)],
              [(0, 250), (250, 250), (0, 500), (250, 500)], [(250, 250), (500, 250), (250, 500), (500, 500)]]
     for i in range(4):
