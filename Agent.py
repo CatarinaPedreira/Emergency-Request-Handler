@@ -21,8 +21,22 @@ class Agent:
         self.emergencies.append(emergency)
 
     def allocate_emergency(self, emergency):
-        #TODO
-        pass
 
-    # Manhattan distance formula, for (x1,x2) and (y1, y2):
+        if emergency.emer_type() == "Life-threatening":
+
+        elif emergency.emer_type() == "Non-life-threatening":
+
+        elif emergency.emer_type() == "Contagious":
+
+        #  Ver ambulancias da zona que estão disponíveis
+
+        for hospital in self.hospitals:
+            for medical_vehicle in hospital.medicalVehicles:
+                if medical_vehicle == "Life-threatening"
+
+
+
+
+
+    #  Manhattan distance formula, for (x1,x2) and (y1, y2):
         # |x1 - x2| + |y1 - y2|

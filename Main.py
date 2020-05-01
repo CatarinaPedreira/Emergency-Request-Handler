@@ -1,4 +1,5 @@
 import tkinter
+from PIL import ImageTk, Image
 import sys
 import time
 from threading import Thread
@@ -16,11 +17,23 @@ hospital_groups = [[None], [None], [None], [None]]
 
 def create_board():
     global canvas
+    canvas_width = 500
+    canvas_height = 500
     board = tkinter.Tk()
-    canvas = tkinter.Canvas(board, width=500, height=500)
+    canvas = tkinter.Canvas(board, width=canvas_width, height=canvas_height)
     canvas.create_line(250, 0, 250, 500, fill="black")
     canvas.create_line(0, 250, 500, 250, fill="black")
-    # TODO create shapes for agents in each zone, hospitals around them
+
+    # Setting it up
+    image = Image.open("imgs/ambula-02.png")
+    image = image.resize((50, 50), Image.ANTIALIAS)  # The (250, 250) is (height, width)
+    img = ImageTk.PhotoImage(image)
+    canvas.create_image(60, 20, image=img)
+
+    # Displaying it
+    #tkinter.Label(canvas, image=img).grid(row=1, column=1)
+
+# TODO create shapes for agents in each zone, hospitals around them
     # Check how to draw cool baby ambulances!
     canvas.pack()
     board.mainloop()
