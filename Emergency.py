@@ -13,6 +13,9 @@ class Emergency:
         self.typeVehicle = type_vehicle
         self.description = description
 
+    def get_eid(self):
+        return self.e_id
+
     def get_location(self):
         return self.location
 
