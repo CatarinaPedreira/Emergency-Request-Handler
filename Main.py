@@ -64,10 +64,12 @@ def setup():
     #        for hosp in hospital_groups[i]:
     #            hosp.set_control_tower(agents[i])
     #            medical_vehicles = []
-    #            for j in range(math.ceil(nVehicles * 0.8)):
+    #            for j in range(math.ceil(nVehicles * 0.7)):
     #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
-    #            for j in range(math.floor(nVehicles * 0.2)):
+    #            for j in range(math.floor(nVehicles * 0.2)): # TODO corrigir floor, agora pode nao funcionar porque sao 3 tipos de veiculos em vez de 2
     #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
+    #            for j in range(math.floor(nVehicles * 0.1)): # TODO corrigir floor, agora pode nao funcionar porque sao 3 tipos de veiculos em vez de 2
+    #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
     #            hosp.set_medical_vehicles(medical_vehicles)
 
     zones = [[(0, 0), (500, 0), (0, 500), (500,500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
@@ -82,14 +84,19 @@ def setup():
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
-            for j in range(4):
+            for j in range(3):
                 medical_vehicles += MedicalVehicle("SBV", 100, 100, "available", hosp,
                                                    None),  # ultimo none tem que ter valor!!!
             medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp,
                                                None),  # ultimo none tem que ter valor!!!
+            medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp,
+                                               None),  # ultimo none tem que ter valor!!!
             hosp.set_medical_vehicles(medical_vehicles)
 
 
+# TODO Fix só dar no máximo x tipos para x pacientes.
+#  Also, neste momento pode acontecer o caso de termos uma emer. com
+#  gravidade 0, e vir uma ambulancia SIV. É na boa deixarmos assim, porque a prob. é baixa?
 def create_emergency(e_id):
     e_id += 1
     e_type = random.choice(emergency_types)
@@ -117,7 +124,6 @@ def allocate_to_agent(emer):
     for i in range(len(zones)):
         if zones[i][0][0] <= emer.location[0] <= zones[i][1][0] and zones[i][0][1] <= emer.location[1] <= zones[i][2][1]:
             emer.set_control_tower(agents[i])
-            print(emer.get_control_tower())
 
     # this comment section is for when we start accepting input from the command line
     #
@@ -144,8 +150,7 @@ while True:
     if quit_switch:
         break
     emergency = create_emergency(emergency_id)
-    allocate_to_agent(emergency)
-    time.sleep(3) # Creates an emergency each 3 seconds, we can change
+    time.sleep(3)  # Creates an emergency each 3 seconds, we can change
     thread = Thread(target=allocate_to_agent, args=(emergency,))
     thread.start()
     thread.join()

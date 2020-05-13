@@ -46,14 +46,21 @@ class Agent:
                         and medical_vehicle.get_medicine() >= min_medicine:
                     possible_ambulances.append(medical_vehicle)
 
-        # Filter which ambulances are closer to the emergency
+        # Filter which ambulances are closer to the emergency, and correspond to the emergency's requirements
+        final_ambulances = []
         min_distance = math.inf
         min_vehicle = None
-        for possibility in possible_ambulances:
-            manhattan_dist = abs(possibility.get_location()[0] - emergency.get_location()[0]) + abs(possibility.get_location()[1] - emergency.get_location()[1])
-            if manhattan_dist < min_distance:
-                min_distance = manhattan_dist
-                min_vehicle = possibility
-                break
+        for i in range(emergency.get_num_patients()):
+            for possibility in possible_ambulances:
+                if emergency.get_type() == "Non life-threatening" and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle() \
+                        or emergency.get_type_vehicle()[i] == possibility.get_type_vehicle():
+                    manhattan_dist = abs(possibility.get_location()[0] - emergency.get_location()[0]) + abs(possibility.get_location()[1] - emergency.get_location()[1])
+                    if manhattan_dist < min_distance:
+                        min_distance = manhattan_dist
+                        min_vehicle = possibility
 
-        return min_vehicle.get_location, min_hospital
+            if min_vehicle is not None:
+                possible_ambulances.remove(min_vehicle)
+                final_ambulances.append(min_vehicle)
+
+        return final_ambulances, min_hospital
