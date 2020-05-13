@@ -65,13 +65,13 @@ def setup():
     #            hosp.set_control_tower(agents[i])
     #            medical_vehicles = []
     #            for j in range(math.ceil(nVehicles * 0.7)):
-    #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
     #            distribution = math.ceil(nVehicles * 0.7)
     #            for j in range(math.ceil(nVehicles * 0.2)):
-    #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
     #            distribution += math.ceil(nVehicles * 0.2)
     #            for j in range((nVehicles - distribution)):
-    #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
     #            hosp.set_medical_vehicles(medical_vehicles)
 
     zones = [[(0, 0), (500, 0), (0, 500), (500,500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
@@ -87,11 +87,11 @@ def setup():
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
             for j in range(3):
-                medical_vehicles += MedicalVehicle("SBV", 100, 100, "available", hosp,
+                medical_vehicles += MedicalVehicle("SBV", 100, 100, "Available", hosp,
                                                    None),  # ultimo none tem que ter valor!!!
-            medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp,
+            medical_vehicles += MedicalVehicle("VMER", 100, 100, "Available", hosp,
                                                None),  # ultimo none tem que ter valor!!!
-            medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp,
+            medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp,
                                                None),  # ultimo none tem que ter valor!!!
             hosp.set_medical_vehicles(medical_vehicles)
 
@@ -100,6 +100,12 @@ def setup():
 #  Also, neste momento pode acontecer o caso de termos uma emer. com
 #  gravidade 0, e vir uma ambulancia SIV. É na boa deixarmos assim, porque a prob. é baixa?
 def create_emergency(e_id):
+
+    for i in range(4): # TODO 4 porque hardcoded, depois tera que ser range(nAgents)
+        for hospital in hospital_groups[i]:
+            for vehicle in hospital.get_medical_vehicles():
+               vehicle.check_vehicle_status()
+
     e_id += 1
     e_type = random.choice(emergency_types)
 
