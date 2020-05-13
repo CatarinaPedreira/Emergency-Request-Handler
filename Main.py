@@ -66,9 +66,11 @@ def setup():
     #            medical_vehicles = []
     #            for j in range(math.ceil(nVehicles * 0.7)):
     #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
-    #            for j in range(math.floor(nVehicles * 0.2)): # TODO corrigir floor, agora pode nao funcionar porque sao 3 tipos de veiculos em vez de 2
+    #            distribution = math.ceil(nVehicles * 0.7)
+    #            for j in range(math.ceil(nVehicles * 0.2)):
     #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
-    #            for j in range(math.floor(nVehicles * 0.1)): # TODO corrigir floor, agora pode nao funcionar porque sao 3 tipos de veiculos em vez de 2
+    #            distribution += math.ceil(nVehicles * 0.2)
+    #            for j in range((nVehicles - distribution)):
     #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
     #            hosp.set_medical_vehicles(medical_vehicles)
 
@@ -126,7 +128,15 @@ def allocate_to_agent(emer):
             emer.set_control_tower(agents[i])
 
     # this comment section is for when we start accepting input from the command line
-    #
+    # TODO not tested yet, should be good tho
+    # for i in range(len(zones)):
+    #   for j in range(len(zones[i])):
+    #       if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[0] <= zones[i][j][1][1]:
+    #           for agent in agents:
+    #               if agent.get_area() == zones[i][j]:
+    #                   emer.set_control_tower(agent)
+    #                   break
+    #           break
 
     emer.get_control_tower().allocate_emergency(emer)
     print("Criei uma emergência!")
