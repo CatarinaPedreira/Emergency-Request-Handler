@@ -1,6 +1,15 @@
 import math
 
 
+def manhattan_distance(a, b):
+    return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
+
+
+def check_availability_vehicle(medical_vehicle, min_fuel, min_medicine):
+    return medical_vehicle.get_status() == "Available" \
+           and medical_vehicle.get_fuel() >= min_fuel \
+           and medical_vehicle.get_medicine() >= min_medicine
+
 class Agent:
     def __init__(self, area_border, district_map, hospitals, emergencies):
         self.area = area_border
@@ -35,15 +44,13 @@ class Agent:
 
         #  Filter the available ambulances and if they are suitable for that emergency
         for hospital in self.hospitals:
-            hospital_dist = abs(hospital.get_location()[0] - emergency.get_location()[0]) + abs(hospital.get_location()[1] - emergency.get_location()[1])
+            hospital_dist = manhattan_distance(hospital, emergency)
             if hospital_dist < min_distance:
                 min_distance = hospital_dist
                 min_hospital = hospital
 
             for medical_vehicle in hospital.medicalVehicles:
-                if medical_vehicle.get_status() == "Available" \
-                        and medical_vehicle.get_fuel() >= min_fuel \
-                        and medical_vehicle.get_medicine() >= min_medicine:
+                if check_availability_vehicle(medical_vehicle, min_fuel, min_medicine):
                     possible_ambulances.append(medical_vehicle)
 
         # Filter which ambulances are closer to the emergency, and correspond to the emergency's requirements
@@ -52,9 +59,9 @@ class Agent:
         min_vehicle = None
         for i in range(emergency.get_num_patients()):
             for possibility in possible_ambulances:
-                if emergency.get_type() == "Non life-threatening" and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle() \
-                        or emergency.get_type_vehicle()[i] == possibility.get_type_vehicle():
-                    manhattan_dist = abs(possibility.get_location()[0] - emergency.get_location()[0]) + abs(possibility.get_location()[1] - emergency.get_location()[1])
+                if len(emergency.get_type_vehicle()) == 1 and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle() \
+                        or len(emergency.get_type_vehicle()) > 1 and emergency.get_type_vehicle()[i] == possibility.get_type_vehicle():
+                    manhattan_dist = manhattan_distance(possibility, emergency)
                     if manhattan_dist < min_distance:
                         min_distance = manhattan_dist
                         min_vehicle = possibility
@@ -63,4 +70,6 @@ class Agent:
                 possible_ambulances.remove(min_vehicle)
                 final_ambulances.append(min_vehicle)
 
+        #  Alterar o return para fazer set à location da emergencia e do hospital no medical vehicle
         return final_ambulances, min_hospital
+

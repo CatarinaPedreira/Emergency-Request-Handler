@@ -74,39 +74,35 @@ def setup():
     #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
     #            hosp.set_medical_vehicles(medical_vehicles)
 
-    zones = [[(0, 0), (500, 0), (0, 500), (500,500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
+    zones = [[(0, 0), (500, 0), (0, 500), (500, 500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
              [(0, 500), (500, 500), (0, 1000), (500, 1000)], [(500, 500), (1000, 500), (500, 1000), (1000, 1000)]]
     for i in range(4):
-        # Hardcoded hospitals, we can change it later
-        hospital_groups[i] = [Hospital(None, 100, 10, None), Hospital(None, 150, 10, None),
-                              Hospital(None, 95, 10, None)]  # primeiro none (location) tem que ter valor!!!
+        # Hardcoded to test, change to new version later
+        location1 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
+        location2 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
+        location3 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
+        hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None), Hospital(location3, 95, 10, None)]
         agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
 
     for i in range(4):
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
-            for j in range(3):
-                medical_vehicles += MedicalVehicle("SBV", 100, 100, "Available", hosp,
-                                                   None),  # ultimo none tem que ter valor!!!
-            medical_vehicles += MedicalVehicle("VMER", 100, 100, "Available", hosp,
-                                               None),  # ultimo none tem que ter valor!!!
-            medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp,
-                                               None),  # ultimo none tem que ter valor!!!
+            for j in range(6):
+                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, hosp.get_location()))
+            for j in range(4):
+                medical_vehicles.append(MedicalVehicle("VMER", 100, 100, "Available", hosp, hosp.get_location()))
+            for j in range(2):
+                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, hosp.get_location()))
             hosp.set_medical_vehicles(medical_vehicles)
 
-
 # TODO Fix só dar no máximo x tipos para x pacientes.
-#  Also, neste momento pode acontecer o caso de termos uma emer. com
-#  gravidade 0, e vir uma ambulancia SIV. É na boa deixarmos assim, porque a prob. é baixa?
 def create_emergency(e_id):
-
-    for i in range(4): # TODO 4 porque hardcoded, depois tera que ser range(nAgents)
+    for i in range(4):  # TODO 4 porque hardcoded, depois tera que ser range(nAgents)
         for hospital in hospital_groups[i]:
             for vehicle in hospital.get_medical_vehicles():
-               vehicle.check_vehicle_status()
+                vehicle.check_vehicle_status()
 
-    e_id += 1
     e_type = random.choice(emergency_types)
 
     patients = 1000
@@ -115,7 +111,6 @@ def create_emergency(e_id):
 
     location = (random.randint(0, 1000), random.randint(0, 1000))
     gravity = random.randint(0, 10)
-    description = "emergency description"
 
     if e_type == "Non life-threatening":
         vehicles = ["SBV"]
@@ -125,7 +120,9 @@ def create_emergency(e_id):
         n = random.randint(1, 3)
         vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.5, 0.3, 0.2])
 
-    return Emergency(e_id, location, e_type, patients, gravity, vehicles, description)
+    print("New emergency arrived at the system: ", "id:" + str(e_id), "type:" + str(e_type),
+          "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
+    return Emergency(e_id, location, e_type, patients, gravity, vehicles)
 
 
 def allocate_to_agent(emer):
@@ -145,7 +142,6 @@ def allocate_to_agent(emer):
     #           break
 
     emer.get_control_tower().allocate_emergency(emer)
-    print("Criei uma emergência!")
 
 
 # def check_quit():
@@ -154,19 +150,25 @@ def allocate_to_agent(emer):
 #     quit_switch = True
 #     print("Goodbye!")
 
+def perception():
 
-#######################################################################################################################
+    # thread = Thread(target=check_quit)
+    # thread.start()
+    # thread.join()
+
+    while True:
+        if quit_switch:
+            break
+        global emergency_id
+        emergency_id += 1
+        emergency = create_emergency(emergency_id)
+        time.sleep(3)  # Creates an emergency each 3 seconds, later change for "frequency" received in input
+        thread = Thread(target=allocate_to_agent, args=(emergency,))
+        thread.start()
+        thread.join()
+
+########################################################################################################################
+
 
 setup()
-# thread = Thread(target=check_quit)
-# thread.start()
-# thread.join()
-
-while True:
-    if quit_switch:
-        break
-    emergency = create_emergency(emergency_id)
-    time.sleep(3)  # Creates an emergency each 3 seconds, we can change
-    thread = Thread(target=allocate_to_agent, args=(emergency,))
-    thread.start()
-    thread.join()
+perception()

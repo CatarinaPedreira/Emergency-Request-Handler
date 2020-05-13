@@ -3,7 +3,7 @@ import datetime
 
 class Emergency:
 
-    def __init__(self, e_id, location, emer_type, num_patients, gravity, type_vehicle, description):
+    def __init__(self, e_id, location, emer_type, num_patients, gravity, type_vehicle):
         # Maybe change date later
         self.e_id = e_id
         self.location = location
@@ -11,7 +11,6 @@ class Emergency:
         self.numPatients = num_patients
         self.gravity = gravity
         self.typeVehicle = type_vehicle
-        self.description = description
         self.controlTower = None
 
     def get_eid(self):
@@ -31,9 +30,6 @@ class Emergency:
 
     def get_type_vehicle(self):
         return self.typeVehicle
-
-    def get_description(self):
-        return self.description
 
     def set_control_tower(self, tower):
         self.controlTower = tower
