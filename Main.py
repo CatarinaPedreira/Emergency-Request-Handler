@@ -87,9 +87,14 @@ def setup():
                                                    None),  # ultimo none tem que ter valor!!!
             medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp,
                                                None),  # ultimo none tem que ter valor!!!
+            medical_vehicles += MedicalVehicle("SIV", 100, 100, "available", hosp,
+                                               None),  # ultimo none tem que ter valor!!!
             hosp.set_medical_vehicles(medical_vehicles)
 
 
+# TODO Fix só dar no máximo x tipos para x pacientes.
+#  Also, neste momento pode acontecer o caso de termos uma emer. com
+#  gravidade 0, e vir uma ambulancia SIV. É na boa deixarmos assim, porque a prob. é baixa?
 def create_emergency(e_id):
     e_id += 1
     e_type = random.choice(emergency_types)
@@ -136,7 +141,7 @@ while True:
     if quit_switch:
         break
     emergency = create_emergency(emergency_id)
-    time.sleep(3) # Creates an emergency each 3 seconds, we can change
+    time.sleep(3)  # Creates an emergency each 3 seconds, we can change
     thread = Thread(target=allocate_to_agent, args=(emergency,))
     thread.start()
     thread.join()
