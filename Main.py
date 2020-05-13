@@ -70,8 +70,8 @@ def setup():
     #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "available", hosp, None), # ultimo none tem que ter valor!!!
     #            hosp.set_medical_vehicles(medical_vehicles)
 
-    zones = [[(0, 0), (250, 0), (0, 250), (250, 250)], [(250, 0), (500, 0), (250, 250), (500, 250)],
-             [(0, 250), (250, 250), (0, 500), (250, 500)], [(250, 250), (500, 250), (250, 500), (500, 500)]]
+    zones = [[(0, 0), (500, 0), (0, 500), (500,500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
+             [(0, 500), (500, 500), (0, 1000), (500, 1000)], [(500, 500), (1000, 500), (500, 1000), (1000, 1000)]]
     for i in range(4):
         # Hardcoded hospitals, we can change it later
         hospital_groups[i] = [Hospital(None, 100, 10, None), Hospital(None, 150, 10, None),
@@ -114,8 +114,16 @@ def create_emergency(e_id):
 
 
 def allocate_to_agent(emer):
+    for i in range(len(zones)):
+        if zones[i][0][0] <= emer.location[0] <= zones[i][1][0] and zones[i][0][1] <= emer.location[1] <= zones[i][2][1]:
+            emer.set_control_tower(agents[i])
+            print(emer.get_control_tower())
+
+    # this comment section is for when we start accepting input from the command line
+    #
+
+    emer.get_control_tower().allocate_emergency(emer)
     print("Criei uma emergência!")
-    #  emer.get_control_tower().allocate_emergency(emer)
 
 
 # def check_quit():
@@ -136,6 +144,7 @@ while True:
     if quit_switch:
         break
     emergency = create_emergency(emergency_id)
+    allocate_to_agent(emergency)
     time.sleep(3) # Creates an emergency each 3 seconds, we can change
     thread = Thread(target=allocate_to_agent, args=(emergency,))
     thread.start()

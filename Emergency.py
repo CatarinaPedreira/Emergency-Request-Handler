@@ -12,6 +12,7 @@ class Emergency:
         self.gravity = gravity
         self.typeVehicle = type_vehicle
         self.description = description
+        self.controlTower = None
 
     def get_eid(self):
         return self.e_id
@@ -33,3 +34,9 @@ class Emergency:
 
     def get_description(self):
         return self.description
+
+    def set_control_tower(self, tower):
+        self.controlTower = tower
+
+    def get_control_tower(self):
+        return self.controlTower

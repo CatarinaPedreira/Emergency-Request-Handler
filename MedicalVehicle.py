@@ -3,10 +3,13 @@ class MedicalVehicle:
         self.type_vehicle = type_vehicle
         self.fuel = fuel_level
         self.medicine = med_counter
+        self.minMedicine = 15 # TODO change later, maybe pass as parameter
         self.status = status
         self.hospital_base = hospital_base
         self.hospital_curr = hospital_base
         self.location = location
+        self.workHours = 0
+        self.maxHours = 8 # TODO change later, maybe pass as parameter
 
     def get_type_vehicle(self):
         return self.type_vehicle
@@ -35,15 +38,21 @@ class MedicalVehicle:
     def decrease_medicine(self, amount):
         self.medicine = self.medicine - amount
 
-    def change_status(self, status):
-        self.status = status
-
     # In case the vehicle changes zone and is now controlled by another hospital
     def change_hospital(self, current):
         self.hospital_curr = current
 
+    def change_status(self, status):
+        self.status = status
+
     def get_location(self):
         return self.location
+
+    def update_work_hours(self): # should increase by one every time ambulance is assigned to an emergency
+        self.workHours += 1
+
+    def get_work_hours(self):
+        return self.workHours
 
     def update_location(self):
         pass
