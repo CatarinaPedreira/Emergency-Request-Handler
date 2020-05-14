@@ -63,6 +63,7 @@ class MedicalVehicle:
                 self.rest -= 1
             else:
                 self.status = 'Available'
+        return self.status
 
     def get_location(self):
         return self.location
@@ -85,5 +86,7 @@ class MedicalVehicle:
     def get_work_hours(self):
         return self.workHours
 
-    def update_location(self):
+    def move(self):
+        # Movimentar-se até ao local da emergência
+        # Movimentar-se da emergencia até ao hospital de destino
         pass
