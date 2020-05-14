@@ -1,13 +1,16 @@
 class MedicalVehicle:
-    def __init__(self, type_vehicle, fuel_level, med_counter, status, hospital_base, location):
+    def __init__(self, type_vehicle, fuel_level, med_counter, status, hospital_base, location, min_medicine, min_fuel):
         self.type_vehicle = type_vehicle
         self.fuel = fuel_level
         self.medicine = med_counter
-        self.minMedicine = 15 # TODO change later, maybe pass as parameter
         self.status = status
         self.hospital_base = hospital_base
         self.hospital_curr = hospital_base
         self.location = location
+        self.minMedicine = min_medicine
+        self.minFuel = min_fuel
+        self.emLocation = None
+        self.emHospital = None
         self.workHours = 0
         self.maxHours = 8 # TODO change later, maybe pass as parameter
         self.rest = self.maxHours // 2
@@ -29,6 +32,12 @@ class MedicalVehicle:
 
     def get_current_hospital(self):
         return self.hospital_curr
+
+    def get_min_medicine(self):
+        return self.minMedicine
+
+    def get_min_fuel(self):
+        return self.minFuel
 
     def decrease_fuel(self, amount):
         self.fuel = self.fuel - amount
@@ -57,6 +66,18 @@ class MedicalVehicle:
 
     def get_location(self):
         return self.location
+
+    def get_em_location(self):
+        return self.emLocation
+
+    def get_em_hospital(self):
+        return self.emHospital
+
+    def set_em_location(self, location):
+        self.emLocation = location
+
+    def set_em_hospital(self, hospital):
+        self.emHospital = hospital
 
     def update_work_hours(self): # should increase by one every time ambulance is assigned to an emergency
         self.workHours += 1

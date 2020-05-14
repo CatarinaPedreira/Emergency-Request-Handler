@@ -21,7 +21,7 @@ hospital_groups = [[None], [None], [None], [None]]
 emergency_types = ("Life-threatening", "Non life-threatening")
 vehicle_types = ("SBV", "VMER", "SIV")
 emergency_id = 0
-#quit_switch = False
+# quit_switch = False
 
 
 def setup():
@@ -77,7 +77,7 @@ def setup():
     zones = [[(0, 0), (500, 0), (0, 500), (500, 500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
              [(0, 500), (500, 500), (0, 1000), (500, 1000)], [(500, 500), (1000, 500), (500, 1000), (1000, 1000)]]
     for i in range(4):
-        # Hardcoded to test, change to new version later
+        # Hardcoded to test, change to new version later (locations may collide, but it is extremely rare)
         location1 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location2 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location3 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
@@ -85,20 +85,22 @@ def setup():
                               Hospital(location3, 95, 10, None)]
         agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
 
+    # Hardcoded minMedicine and minFuel on MedicalVehicles (15 e 10), can change the values if u want
     for i in range(4):
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
             for j in range(6):
-                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, hosp.get_location()))
+                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
             for j in range(4):
-                medical_vehicles.append(MedicalVehicle("VMER", 100, 100, "Available", hosp, hosp.get_location()))
+                medical_vehicles.append(
+                    MedicalVehicle("VMER", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
             for j in range(2):
-                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, hosp.get_location()))
+                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
             hosp.set_medical_vehicles(medical_vehicles)
 
 
-# TODO Fix só dar no máximo x tipos para x pacientes.
+# TODO Fix dar no máximo x tipos para x pacientes.
 def create_emergency(e_id):
     for i in range(4):  # TODO 4 porque hardcoded, depois tera que ser range(nAgents)
         for hospital in hospital_groups[i]:
@@ -122,8 +124,7 @@ def create_emergency(e_id):
         n = random.randint(1, 3)
         vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.5, 0.3, 0.2])
 
-    print("New emergency arrived at the system: ", "id:" + str(e_id), "type:" + str(e_type),
-          "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
+    print("New emergency arrived at the system.", "id:" + str(e_id), "type:" + str(e_type), "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
     return Emergency(e_id, location, e_type, patients, gravity, vehicles)
 
 
@@ -131,6 +132,7 @@ def allocate_to_agent(emer):
     for i in range(len(zones)):
         if zones[i][0][0] <= emer.location[0] <= zones[i][1][0] and zones[i][0][1] <= emer.location[1] <= zones[i][2][1]:
             emer.set_control_tower(agents[i])
+            break
 
     # this comment section is for when we start accepting input from the command line
     # TODO not tested yet, should be good tho
@@ -144,6 +146,7 @@ def allocate_to_agent(emer):
     #           break
 
     emer.get_control_tower().allocate_emergency(emer)
+    print("Emergency nº", emergency_id, "allocated to control tower from zone", i)
 
 
 # def check_quit():
@@ -152,7 +155,7 @@ def allocate_to_agent(emer):
 #     quit_switch = True
 #     print("Goodbye!")
 
-def percept_emergencies():
+def perceive_emergencies():
     # thread = Thread(target=check_quit)
     # thread.start()
     # thread.join()
@@ -172,4 +175,4 @@ def percept_emergencies():
 ########################################################################################################################
 
 setup()
-percept_emergencies()
+perceive_emergencies()
