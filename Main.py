@@ -145,8 +145,8 @@ def allocate_to_agent(emer):
     #                   break
     #           break
 
-    emer.get_control_tower().allocate_emergency(emer)
     print("Emergency nº", emergency_id, "allocated to control tower from zone", i)
+    emer.get_control_tower().allocate_emergency(emer)
 
 
 # def check_quit():
@@ -167,9 +167,7 @@ def perceive_emergencies():
         emergency_id += 1
         emergency = create_emergency(emergency_id)
         time.sleep(3)  # Creates an emergency each 3 seconds, later change for "frequency" received in input
-        thread = Thread(target=allocate_to_agent, args=(emergency,))
-        thread.start()
-        thread.join()
+        allocate_to_agent(emergency)
 
 
 ########################################################################################################################

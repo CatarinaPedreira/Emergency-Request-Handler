@@ -1,5 +1,4 @@
 import math
-import random
 
 
 def manhattan_distance(a, b):
@@ -89,3 +88,5 @@ class Agent:
 
             min_distance = math.inf
             min_vehicle = None
+
+        print(len(final_ambulances), "medical vehicles where allocated to deal with emergency nº", emergency.get_eid(), "\n")
