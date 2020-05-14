@@ -21,7 +21,7 @@ hospital_groups = [[None], [None], [None], [None]]
 emergency_types = ("Life-threatening", "Non life-threatening")
 vehicle_types = ("SBV", "VMER", "SIV")
 emergency_id = 0
-quit_switch = False
+#quit_switch = False
 
 
 def setup():
@@ -81,7 +81,8 @@ def setup():
         location1 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location2 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location3 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
-        hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None), Hospital(location3, 95, 10, None)]
+        hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None),
+                              Hospital(location3, 95, 10, None)]
         agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
 
     for i in range(4):
@@ -95,6 +96,7 @@ def setup():
             for j in range(2):
                 medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, hosp.get_location()))
             hosp.set_medical_vehicles(medical_vehicles)
+
 
 # TODO Fix só dar no máximo x tipos para x pacientes.
 def create_emergency(e_id):
@@ -150,15 +152,14 @@ def allocate_to_agent(emer):
 #     quit_switch = True
 #     print("Goodbye!")
 
-def perception():
-
+def percept_emergencies():
     # thread = Thread(target=check_quit)
     # thread.start()
     # thread.join()
 
     while True:
-        if quit_switch:
-            break
+        # if quit_switch:
+        #     break
         global emergency_id
         emergency_id += 1
         emergency = create_emergency(emergency_id)
@@ -167,8 +168,8 @@ def perception():
         thread.start()
         thread.join()
 
+
 ########################################################################################################################
 
-
 setup()
-perception()
+percept_emergencies()

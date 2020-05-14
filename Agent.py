@@ -10,6 +10,7 @@ def check_availability_vehicle(medical_vehicle, min_fuel, min_medicine):
            and medical_vehicle.get_fuel() >= min_fuel \
            and medical_vehicle.get_medicine() >= min_medicine
 
+
 class Agent:
     def __init__(self, area_border, district_map, hospitals, emergencies):
         self.area = area_border
@@ -31,6 +32,14 @@ class Agent:
 
     def add_emergency(self, emergency):
         self.emergencies.append(emergency)
+
+    def available_ambulances(self):
+        available = []
+        for hosp in self.hospitals:
+            for mv in hosp.medicalVehicles:
+                if mv.get_status() == "Available":
+                    available.append(mv)
+        return available
 
     # Not considering collaboration between agents yet
     def allocate_emergency(self, emergency):
@@ -70,6 +79,7 @@ class Agent:
                 possible_ambulances.remove(min_vehicle)
                 final_ambulances.append(min_vehicle)
 
-        #  Alterar o return para fazer set à location da emergencia e do hospital no medical vehicle
+        # Se ja n houver recursos suficientes num hospital ver qual e o 2 mais proximo
+        #  Mudar o status de todas as final ambulances para unavailable
+        #  Alterar o return para fazer em vez disto fazer set à location da emergencia e do hospital no medical vehicle
         return final_ambulances, min_hospital
-
