@@ -26,6 +26,7 @@ emergency_id = 0
 
 def setup():
     global zones
+    #  DO NOT ERASE!! This comment section is for when we start accepting input from the command line
     #    global zones, hospital_groups, agents, nRows, nColumns
 
     # line = 'Agents=x Hospitals/zone=x Ambulances/zone=x Emergencies-frequency=x' - exemplo
