@@ -86,6 +86,10 @@ class MedicalVehicle:
     def get_work_hours(self):
         return self.workHours
 
+    def update_location(self, x, y):
+        self.location[0] += x
+        self.location[1] += y
+
     def move(self):
         # Movimentar-se até ao local da emergência
         # Movimentar-se da emergencia até ao hospital de destino
