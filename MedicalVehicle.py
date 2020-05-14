@@ -91,6 +91,8 @@ class MedicalVehicle:
         self.location[1] += y
 
     def move(self):
+        # Ver como fazer isto c os tiks
+        # Vai fazer update à location, 1 a 1, a cada tik
         # Movimentar-se até ao local da emergência
         # Movimentar-se da emergencia até ao hospital de destino
         pass
