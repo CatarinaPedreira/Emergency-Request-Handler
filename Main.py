@@ -1,10 +1,8 @@
 import random
 import sys
 import time
-import math
-from threading import Thread
-
-import keyboard
+# from threading import Thread
+# import keyboard
 import numpy
 from Agent import Agent
 from Emergency import Emergency
@@ -29,12 +27,13 @@ def setup():
     #  DO NOT ERASE!! This comment section is for when we start accepting input from the command line
     #    global zones, hospital_groups, agents, nRows, nColumns
 
-    # line = 'Agents=x Hospitals/zone=x Ambulances/zone=x Emergencies-frequency=x' - exemplo
+    # line = 'Agents=x Hospitals/zone=x Ambulances/zone=x Emergencies-frequency=x Cycle-time=x' - exemplo
     #    line = (sys.stdin.readline()).split(' ')
     #    nAgents = int(line[0])
     #    nHospitals = int(line[1])
     #    nVehicles = int(line[2])
     #    emer_frequency = int(line[3])
+    #    cycle_time = int(line[4])
 
     #    for i in range(int(math.sqrt(nAgents)), 0, -1):
     #        if nAgents % i == 0:
@@ -59,22 +58,23 @@ def setup():
     #        while column >= nColumns:
     #            row += 1
     #            column -= nColumns
-    #        agents += Agent(zones[row][column], zones, hospital_groups[i], None),
+    #        agents += Agent(zones[row][column], zones, hospital_groups[i], None, cycle_time),
 
     #    for i in range(nAgents):
     #        for hosp in hospital_groups[i]:
     #            hosp.set_control_tower(agents[i])
     #            medical_vehicles = []
     #            for j in range(math.ceil(nVehicles * 0.7)):
-    #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("SBV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10),
     #            distribution = math.ceil(nVehicles * 0.7)
     #            for j in range(math.ceil(nVehicles * 0.2)):
-    #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("VMER", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10),
     #            distribution += math.ceil(nVehicles * 0.2)
     #            for j in range((nVehicles - distribution)):
-    #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp, None), # ultimo none tem que ter valor!!!
+    #                medical_vehicles += MedicalVehicle("SIV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10),
     #            hosp.set_medical_vehicles(medical_vehicles)
 
+    cycle_time = 1 # Hardcoded, vamos receber do utilizador
     zones = [[(0, 0), (500, 0), (0, 500), (500, 500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
              [(0, 500), (500, 500), (0, 1000), (500, 1000)], [(500, 500), (1000, 500), (500, 1000), (1000, 1000)]]
     for i in range(4):
@@ -82,9 +82,8 @@ def setup():
         location1 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location2 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
         location3 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
-        hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None),
-                              Hospital(location3, 95, 10, None)]
-        agents[i] = Agent(zones[i], zones, hospital_groups[i], None)
+        hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None), Hospital(location3, 95, 10, None)]
+        agents[i] = Agent(zones[i], zones, hospital_groups[i], None, cycle_time)
 
     # Hardcoded minMedicine and minFuel on MedicalVehicles (15 e 10), can change the values if u want
     for i in range(4):
@@ -92,12 +91,12 @@ def setup():
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
             for j in range(6):
-                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
+                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
             for j in range(4):
                 medical_vehicles.append(
-                    MedicalVehicle("VMER", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
+                    MedicalVehicle("VMER", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
             for j in range(2):
-                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, hosp.get_location(), 15, 10))
+                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
             hosp.set_medical_vehicles(medical_vehicles)
 
 
@@ -125,6 +124,7 @@ def create_emergency(e_id):
         n = random.randint(1, 3)
         vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.5, 0.3, 0.2])
 
+    print("-----------------------------------------------------------------------------")
     print("New emergency arrived at the system.", "id:" + str(e_id), "type:" + str(e_type), "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
     return Emergency(e_id, location, e_type, patients, gravity, vehicles)
 

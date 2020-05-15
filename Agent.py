@@ -9,20 +9,13 @@ def check_availability_vehicle(medical_vehicle, min_medicine, min_fuel):
     return medical_vehicle.check_vehicle_status() == "Available" and medical_vehicle.get_fuel() >= min_fuel and medical_vehicle.get_medicine() >= min_medicine
 
 
-def activate_medical_vehicles(final_vehicles):
-    for vehicle in final_vehicles:
-        vehicle.move()
-
-    # Esta funcao é equivalente à funcao step() do loading_docks (na classe Board)
-    # Ver como coordenar as ambulancias todas, de modo a que avancem as coordenadas ao mesmo tempo (c/cada tik)
-
-
 class Agent:
-    def __init__(self, area_border, district_map, hospitals, emergencies):
+    def __init__(self, area_border, district_map, hospitals, emergencies, cycle_time):
         self.area = area_border
         self.map = district_map
         self.hospitals = hospitals
         self.emergencies = emergencies
+        self.cycleTime = cycle_time
 
     def get_area(self):
         return self.area
@@ -58,6 +51,9 @@ class Agent:
 
         return min_hospital
 
+    def activate_medical_vehicles(self, final_vehicles):
+        for vehicle in final_vehicles:
+            vehicle.move(self.cycleTime)
 
     ###############################
     ###### Agent's Decision #######
@@ -67,6 +63,7 @@ class Agent:
     # (When all hospitals don't have enough resources, ask help of another agent)
     def allocate_emergency(self, emergency):
 
+        id_number = 0
         final_vehicles = []
         min_distance = math.inf
         min_vehicle = None
@@ -98,10 +95,15 @@ class Agent:
                 #  min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
                 min_vehicle.set_em_location(emergency.get_location())
                 min_vehicle.set_em_hospital(min_hospital)
+                min_vehicle.set_id(id_number)
+                id_number += 1
                 final_vehicles.append(min_vehicle)
 
             min_distance = math.inf
             min_vehicle = None
 
-        activate_medical_vehicles(final_vehicles)
-        print(len(final_vehicles), "medical vehicles where allocated to deal with emergency nº", emergency.get_eid(), "\n")
+        if len(final_vehicles) == 1:
+            print(1, "medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
+        else:
+            print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
+        self.activate_medical_vehicles(final_vehicles)

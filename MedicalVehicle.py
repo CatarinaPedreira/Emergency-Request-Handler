@@ -1,3 +1,10 @@
+import time
+
+
+def equal_locations(list_location, tuple_location):
+    return list_location[0] == tuple_location[0] and list_location[1] == tuple_location[1]
+
+
 class MedicalVehicle:
     def __init__(self, type_vehicle, fuel_level, med_counter, status, hospital_base, location, min_medicine, min_fuel):
         self.type_vehicle = type_vehicle
@@ -14,6 +21,7 @@ class MedicalVehicle:
         self.workHours = 0
         self.maxHours = 8 # TODO change later, maybe pass as parameter
         self.rest = self.maxHours // 2
+        self.id = 0  # Only for the prints
 
     def get_type_vehicle(self):
         return self.type_vehicle
@@ -86,13 +94,34 @@ class MedicalVehicle:
     def get_work_hours(self):
         return self.workHours
 
-    def update_location(self, x, y):
-        self.location[0] += x
-        self.location[1] += y
+    def set_id(self, number):
+        self.id = number
 
-    def move(self):
-        # Ver como fazer isto c os tiks
-        # Vai fazer update à location, 1 a 1, a cada tik
-        # Movimentar-se até ao local da emergência
-        # Movimentar-se da emergencia até ao hospital de destino
-        pass
+    #  Step/Cycle
+    def update_location(self, start, dest):
+        if start[0] < dest[0]:
+            start[0] += 1
+        elif start[0] > dest[0]:
+            start[0] -= 1
+        if start[1] < dest[1]:
+            start[1] += 1
+        elif start[1] > dest[1]:
+            start[1] -= 1
+
+        self.location = start
+
+    def move(self, time_sleep):
+
+        # Move from location to emergency
+        while not equal_locations(self.location, self.emLocation):
+            self.update_location(self.location, self.emLocation)
+            time.sleep(time_sleep / 1000)
+
+        print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
+
+        # Move from emergency location to emergency's hospital
+        while not equal_locations(self.location, self.emLocation):
+            self.update_location(self.location, self.emHospital)
+            time.sleep(time_sleep / 1000)
+
+        print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
