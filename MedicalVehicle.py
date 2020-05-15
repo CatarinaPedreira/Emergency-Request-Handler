@@ -120,8 +120,8 @@ class MedicalVehicle:
         print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
 
         # Move from emergency location to emergency's hospital
-        while not equal_locations(self.location, self.emLocation):
-            self.update_location(self.location, self.emHospital)
+        while not equal_locations(self.location, self.emHospital.get_location()):
+            self.update_location(self.location, self.emHospital.get_location())
             time.sleep(time_sleep / 1000)
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
