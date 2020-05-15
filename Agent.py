@@ -5,10 +5,6 @@ def manhattan_distance(a, b):
     return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
 
 
-def check_availability_vehicle(medical_vehicle, min_medicine, min_fuel):
-    return medical_vehicle.check_vehicle_status() == "Available" and medical_vehicle.get_fuel() >= min_fuel and medical_vehicle.get_medicine() >= min_medicine
-
-
 class Agent:
     def __init__(self, area_border, district_map, hospitals, emergencies, cycle_time):
         self.area = area_border
@@ -36,7 +32,7 @@ class Agent:
         possible_ambulances = []
         for hospital in self.hospitals:
             for medical_vehicle in hospital.medicalVehicles:
-                if check_availability_vehicle(medical_vehicle, medical_vehicle.get_min_medicine(), medical_vehicle.get_min_fuel()):
+                if medical_vehicle.check_vehicle_status() == "Available":  # TODO basta medical_vehicle.get_status
                     possible_ambulances.append(medical_vehicle)
 
         return possible_ambulances
@@ -55,19 +51,21 @@ class Agent:
         for vehicle in final_vehicles:
             vehicle.move(self.cycleTime)
 
-    ###############################
-    ###### Agent's Decision #######
-    ###############################
+    ###################
+    # Agent's Decision#
+    ###################
 
     # Not considering collaboration between agents yet
     # (When all hospitals don't have enough resources, ask help of another agent)
     def allocate_emergency(self, emergency):
 
+        # Here, for the fuel, potentially will have to add a function to check if the vehicle can go to the end of the
+        # map and back (or sth like that)
+
         id_number = 0
         final_vehicles = []
         min_distance = math.inf
         min_vehicle = None
-
         min_hospital = self.check_closest_hospital(emergency, math.inf)
         possible_ambulances = self.filter_medical_vehicles()
 
@@ -90,7 +88,6 @@ class Agent:
 
             if min_vehicle is not None:
                 possible_ambulances.remove(min_vehicle)
-                min_vehicle.change_status("Unavailable")
                 min_vehicle.update_work_hours()
                 #  min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
                 min_vehicle.set_em_location(emergency.get_location())
