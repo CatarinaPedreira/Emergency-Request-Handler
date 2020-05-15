@@ -88,7 +88,7 @@ class MedicalVehicle:
     def set_em_hospital(self, hospital):
         self.emHospital = hospital
 
-    def update_work_hours(self): # should increase by one every time ambulance is assigned to an emergency
+    def update_work_hours(self):  # should increase by one every time ambulance is assigned to an emergency
         self.workHours += 1
 
     def get_work_hours(self):
@@ -110,18 +110,18 @@ class MedicalVehicle:
 
         self.location = start
 
-    def move(self, time_sleep):
+    def move(self, cycle_time):
 
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(time_sleep / 1000)
+            time.sleep(cycle_time / 1000)
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
 
         # Move from emergency location to emergency's hospital
         while not equal_locations(self.location, self.emHospital.get_location()):
             self.update_location(self.location, self.emHospital.get_location())
-            time.sleep(time_sleep / 1000)
+            time.sleep(cycle_time / 1000)
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
