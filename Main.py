@@ -124,7 +124,7 @@ def create_emergency(e_id):
         n = random.randint(1, 3)
         vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.5, 0.3, 0.2])
 
-    print("-----------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------")
     print("New emergency arrived at the system.", "id:" + str(e_id), "type:" + str(e_type), "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
     return Emergency(e_id, location, e_type, patients, gravity, vehicles)
 
