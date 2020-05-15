@@ -91,42 +91,42 @@ def setup():
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
             for j in range(6):
-                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
+                medical_vehicles.append(MedicalVehicle("SBV", 100, 100, hosp, list(hosp.get_location()), 15, 10))
             for j in range(4):
                 medical_vehicles.append(
-                    MedicalVehicle("VMER", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
+                    MedicalVehicle("VMER", 100, 100, hosp, list(hosp.get_location()), 15, 10))
             for j in range(2):
-                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, "Available", hosp, list(hosp.get_location()), 15, 10))
+                medical_vehicles.append(MedicalVehicle("SIV", 100, 100, hosp, list(hosp.get_location()), 15, 10))
             hosp.set_medical_vehicles(medical_vehicles)
 
 
-# TODO Fix dar no máximo x tipos para x pacientes.
 def create_emergency(e_id):
-    for i in range(4):  # TODO 4 porque hardcoded, depois tera que ser range(nAgents)
-        for hospital in hospital_groups[i]:
-            for vehicle in hospital.get_medical_vehicles():
-                vehicle.check_vehicle_status()
-
     e_type = random.choice(emergency_types)
 
-    patients = 1000
-    while patients > 100:
+    patients = 100     # place holder just a big number
+    while patients > 20:
         patients = round(random.lognormvariate(0, 3)) + 1
 
     location = (random.randint(0, 1000), random.randint(0, 1000))
-    gravity = random.randint(0, 10)
+    gravity = random.randint(1, 10)
 
+    vehicles = ["VMER"]
     if e_type == "Non life-threatening":
         vehicles = ["SBV"]
-    elif patients == 1:
-        vehicles = random.sample(vehicle_types, k=1)
     else:
-        n = random.randint(1, 3)
-        vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.5, 0.3, 0.2])
+        if patients == 1:
+            n = 1
+        elif patients == 2:
+            n = numpy.random.choice([1, 2], 1, p=[0.9, 0.1])
+        else:
+            n = numpy.random.choice([1, 2, 3], 1, p=[0.85, 0.10, 0.05])
+        while "VMER" in vehicles and ("SBV" not in vehicles and "SIV" not in vehicles):     # because VMER can't be allocated alone
+            vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.7, 0.20, 0.10])
 
-    print("-------------------------------------------------------------------------------")
-    print("New emergency arrived at the system.", "id:" + str(e_id), "type:" + str(e_type), "location:" + str(location), "num of patients:" + str(patients), "type of vehicles:" + str(vehicles))
-    return Emergency(e_id, location, e_type, patients, gravity, vehicles)
+    emergency = Emergency(e_id, location, e_type, patients, gravity, vehicles)
+    print("-------------------------------New Emergency-------------------------------")
+    print(emergency)
+    return emergency
 
 
 def allocate_to_agent(emer):
@@ -175,3 +175,5 @@ def perceive_emergencies():
 
 setup()
 perceive_emergencies()
+
+
