@@ -1,5 +1,5 @@
 import time
-
+import random
 
 def equal_locations(list_location, tuple_location):
     return list_location[0] == tuple_location[0] and list_location[1] == tuple_location[1]
@@ -51,11 +51,18 @@ class MedicalVehicle:
         if self.fuel <= self.minFuel:
             self.change_status("Replenish")
 
-    def decrease_medicine(self, amount):    # TODO em vez de amount, receber gravity e type of emergency p/ calculo (gravity de 1-10 e type = 0/1/2) Contas do amount nunca vão puder dar superior ao valor minimo
-        # amount = random.randint(type*gravity, type*gravity + 10)
+    def decrease_medicine(self, gravity, emer_type):
+        # gravity varies on a scale of 1 to 10; type can be LT or non-LT
+        if emer_type == "Life-threatening":
+            type = 2
+        else: # emer_type = "Non Life-threatening"
+            type = random.randint(0,1)
+
+        amount = random.randint(type*gravity, type*gravity + 10) # medicine needed will be, at max, 30
+
         self.medicine = self.medicine - amount
         if self.medicine <= self.minMedicine:
-            self.change_status("Replenish")
+            self.change_status("Replenish")  # ainda faz esta emergencia como "Available" mas na proxima ja vai estar em modo "Replenish"
 
     # In case the vehicle changes zone and is now controlled by another hospital
     def change_hospital(self, current):
@@ -73,6 +80,7 @@ class MedicalVehicle:
                 self.rest -= 1
             else:
                 self.status = 'Available'
+                self.rest = self.maxHours // 2
         return self.status
 
     def get_location(self):
@@ -93,8 +101,17 @@ class MedicalVehicle:
     def update_work_hours(self):  # should increase by one every time ambulance is assigned to an emergency
         self.workHours += 1
 
+        if self.workHours == self.maxHours:
+            self.change_status("Rest")
+
     def get_work_hours(self):
         return self.workHours
+
+    def get_max_hours(self):
+        return self.maxHours
+
+    def get_rest(self):
+        return self.rest
 
     def set_id(self, number):
         self.id = number
@@ -128,7 +145,9 @@ class MedicalVehicle:
             self.update_location(self.location, self.emHospital.get_location())
             time.sleep(cycle_time / 1000)
 
-        self.change_status("Available")
+        if self.status != "Replenish" and self.status != "Rest":  # TODO status="Rest" probs vai ser alterado
+            self.change_status("Available")
+
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
 
     def replenish(self):

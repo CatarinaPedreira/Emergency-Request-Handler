@@ -50,6 +50,8 @@ class Agent:
     def activate_medical_vehicles(self, final_vehicles):
         for vehicle in final_vehicles:
             vehicle.move(self.cycleTime)
+            # if vehicle.get_rest() == vehicle.get_max_hours() // 2:
+
 
     ###################
     # Agent's Decision#
@@ -89,7 +91,8 @@ class Agent:
             if min_vehicle is not None:
                 possible_ambulances.remove(min_vehicle)
                 min_vehicle.update_work_hours()
-                #  min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
+                min_vehicle.change_status("Assigned")
+                min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
                 min_vehicle.set_em_location(emergency.get_location())
                 min_vehicle.set_em_hospital(min_hospital)
                 min_vehicle.set_id(id_number)
