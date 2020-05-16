@@ -11,77 +11,83 @@ from MedicalVehicle import MedicalVehicle
 from Hospital import Hospital
 
 zones = []
-# agents = [None, None, None, None]
 agents = []
-# hospital_groups = [[None], [None], [None], [None]]
-hospital_groups=[]
-nRows = 0
-nColumns = 0
+hospital_groups = []
 emergency_types = ("Life-threatening", "Non life-threatening")
 vehicle_types = ("SBV", "VMER", "SIV")
 emergency_id = 0
+width = 0
+height = 0
+cycle_time = 1
 # quit_switch = False
 
 
 def setup():
-    # global zones
-    #  DO NOT ERASE!! This comment section is for when we start accepting input from the command line
-    global zones, hospital_groups, agents, nRows, nColumns
+    global zones, hospital_groups, agents, width, height, cycle_time
 
-    #TODO calcular fuel/medicine melhor com area
-
-    print('\n')
     print("-------------------Medical Emergencies Dispatcher System-------------------")
-    nAgents = eval(input("Number of Control Towers: "))
-    nHospitals = eval(input("Number of Hospitals per zone: "))
-    nVehicles = eval(input("Number of Medical Vehicles per zone: "))
+    area = eval(input("Area size (as width,height): "))
+    n_agents = eval(input("Number of Control Towers: "))
+    n_hospitals = eval(input("Number of Hospitals per zone: "))
+    n_vehicles = eval(input("Number of Medical Vehicles per hospital: "))
     cycle_time = eval(input("Frequency of Medical Emergencies (in seconds): "))
-    print('\n')
 
-    for i in range(int(math.sqrt(nAgents)), 0, -1):
-        if nAgents % i == 0:
-            nRows = i
-            nColumns = nAgents//i
-            for m in range (nRows):
+    width = area[0]
+    height = area[1]
+    n_rows = 0
+    n_columns = 0
+
+    # calculate zones in accordance with number of agents (towers)
+    for i in range(int(math.sqrt(n_agents)), 0, -1):
+        if n_agents % i == 0:
+            n_rows = i
+            n_columns = n_agents//i
+            for m in range(n_rows):
                 zones += [],
-                for n in range(nColumns):
+                for n in range(n_columns):
                     zones[m] += [(), (), (), ()],
-                    zones[m][n][0] = (1000/nRows*m, 1000/nColumns*n)
-                    zones[m][n][1] = (1000/nRows*m, 1000/nColumns*(n+1))
-                    zones[m][n][2] = (1000/nRows*(m+1), 1000/nColumns*n)
-                    zones[m][n][3] = (1000/nRows*(m+1), 1000/nColumns*(n+1))
+                    zones[m][n][0] = (height / n_rows * m, width / n_columns * n)
+                    zones[m][n][1] = (height / n_rows * m, width / n_columns * (n + 1))
+                    zones[m][n][2] = (height / n_rows * (m + 1), width / n_columns * n)
+                    zones[m][n][3] = (height / n_rows * (m + 1), width / n_columns * (n + 1))
             break
 
-    for i in range(nAgents):
+    for i in range(n_agents):
         hospital_groups += [],
-        for j in range(nHospitals):
-            hospital_groups[i] += Hospital(None, None, 100, None), # TODO adicionar location mais a baixo
+        for j in range(n_hospitals):
+            hospital_groups[i] += Hospital(),
         column = i
         row = 0
-        while column >= nColumns:
+        while column >= n_columns:
             row += 1
-            column -= nColumns
-        agents += Agent(zones[row][column], zones, hospital_groups[i], None, cycle_time),
+            column -= n_columns
+        agents += Agent(zones[row][column], zones, hospital_groups[i], cycle_time),
 
-    for i in range(nAgents):
+    for i in range(n_agents):
         for hospital in agents[i].get_hospitals():
             location = (random.randint(agents[i].get_area()[0][0], agents[i].get_area()[2][0]), random.randint(agents[i].get_area()[0][1], agents[i].get_area()[1][1]))
             hospital.set_location(location)
 
-    # Hardcoded minMedicine and minFuel on MedicalVehicles (30 e 10), can change the values if u want
+    # Hardcoded minMedicine and minFuel on MedicalVehicles (30 ei 10), can change the values if u want
     # minMedicine, if changed, should be in accordance with MedicalVehicle.decrease_medicine(type, gravity)
-    for i in range(nAgents):
+    sbv_id = 0
+    vmer_id = 0
+    siv_id = 0
+    for i in range(n_agents):
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
-            for j in range(math.ceil(nVehicles * 0.8)):
-                medical_vehicles += MedicalVehicle("SBV", 100, 100, hosp, list(hosp.get_location()), 30, 10),
-            distribution = math.ceil(nVehicles * 0.8)
-            for j in range(math.ceil(nVehicles * 0.15)):
-                medical_vehicles += MedicalVehicle("VMER", 100, 100, hosp, list(hosp.get_location()), 30, 10),
-            distribution += math.ceil(nVehicles * 0.15)
-            for j in range((nVehicles - distribution)):
-                medical_vehicles += MedicalVehicle("SIV", 100, 100, hosp, list(hosp.get_location()), 30, 10),
+            d1 = math.ceil(n_vehicles * 0.8)
+            for j in range(d1):
+                sbv_id += 1
+                medical_vehicles += MedicalVehicle(sbv_id, "SBV", hosp),
+            d2 = math.ceil(n_vehicles * 0.15)
+            for j in range(d2):
+                vmer_id += 1
+                medical_vehicles += MedicalVehicle(vmer_id, "VMER", hosp),
+            for j in range(n_vehicles - d1 - d2):
+                siv_id += 1
+                medical_vehicles += MedicalVehicle(siv_id, "SIV", hosp),
             hosp.set_medical_vehicles(medical_vehicles)
 
     # cycle_time = 1 # Hardcoded, vamos receber do utilizador
@@ -114,11 +120,11 @@ def setup():
 def create_emergency(e_id):
     e_type = random.choice(emergency_types)
 
-    patients = 100     # place holder just a big number
+    patients = 100     # just a big number
     while patients > 20:
         patients = round(random.lognormvariate(0, 4)) + 1
 
-    location = (random.randint(0, 1000), random.randint(0, 1000))
+    location = (random.randint(0, width), random.randint(0, height))
     gravity = random.randint(1, 10)
 
     vehicles = ["VMER"]
@@ -147,7 +153,7 @@ def allocate_to_agent(emer):
     #         break
 
     # this comment section is for when we start accepting input from the command line
-    # TODO not tested yet, should be good tho
+    # TODO not tested yet, should be good tho NOP is always allocating to 1
     for i in range(len(zones)):
         for j in range(len(zones[i])):
             if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[0] <= zones[i][j][1][1]:
@@ -167,7 +173,7 @@ def perceive_emergencies():
         global emergency_id
         emergency_id += 1
         emergency = create_emergency(emergency_id)
-        time.sleep(3)  # Creates an emergency each 3 seconds, later change for "frequency" received in input
+        time.sleep(cycle_time)
         allocate_to_agent(emergency)
 
 

@@ -1,29 +1,28 @@
 import time
 import random
 
+
 def equal_locations(list_location, tuple_location):
     return list_location[0] == tuple_location[0] and list_location[1] == tuple_location[1]
 
 
 class MedicalVehicle:
-    def __init__(self, type_vehicle, fuel_level, med_counter, hospital_base, location, min_medicine, min_fuel):
+    def __init__(self, ident, type_vehicle, hospital_base):
+        self.id = ident
         self.type_vehicle = type_vehicle
-        self.fuel = fuel_level
-        self.medicine = med_counter
-        self.max_fuel = fuel_level
-        self.max_medicine = med_counter
+        self.fuel = self.max_fuel = 2000
+        self.medicine = self.max_medicine = 200
         self.status = "Available"    # (Available, Assigned, Rest, Replenish)
         self.hospital_base = hospital_base
         self.hospital_curr = hospital_base
-        self.location = location
-        self.minMedicine = min_medicine
-        self.minFuel = min_fuel     # maybe big enough para ir de uma ponta a outra da area de controlo
+        self.location = list(hospital_base.get_location())
+        self.minMedicine = 30
+        self.minFuel = 200
         self.emLocation = None
         self.emHospital = None
         self.workHours = 0
-        self.maxHours = 8   # TODO change later, maybe pass as parameter
+        self.maxHours = 8
         self.rest = self.maxHours // 2
-        self.id = 0  # Only for the prints
 
     def get_type_vehicle(self):
         return self.type_vehicle
@@ -54,11 +53,11 @@ class MedicalVehicle:
     def decrease_medicine(self, gravity, emer_type):
         # gravity varies on a scale of 1 to 10; type can be LT or non-LT
         if emer_type == "Life-threatening":
-            type = 2
-        else: # emer_type = "Non Life-threatening"
-            type = random.randint(0,1)
+            e_type = 2
+        else:   # emer_type = "Non Life-threatening"
+            e_type = random.randint(0, 1)
 
-        amount = random.randint(type*gravity, type*gravity + 10) # medicine needed will be, at max, 30
+        amount = random.randint(e_type * gravity, e_type * gravity + 10) # medicine needed will be, at max, 30
 
         self.medicine = self.medicine - amount
         if self.medicine <= self.minMedicine:
@@ -98,7 +97,7 @@ class MedicalVehicle:
     def set_em_hospital(self, hospital):
         self.emHospital = hospital
 
-    def update_work_hours(self):  # should increase by one every time ambulance is assigned to an emergency
+    def update_work_hours(self):
         self.workHours += 1
 
         if self.workHours == self.maxHours:
@@ -112,9 +111,6 @@ class MedicalVehicle:
 
     def get_rest(self):
         return self.rest
-
-    def set_id(self, number):
-        self.id = number
 
     #  Step/Cycle
     def update_location(self, start, dest):

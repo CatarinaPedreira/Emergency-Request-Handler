@@ -6,11 +6,11 @@ def manhattan_distance(a, b):
 
 
 class Agent:
-    def __init__(self, area_border, district_map, hospitals, emergencies, cycle_time):
+    def __init__(self, area_border, district_map, hospitals, cycle_time):
         self.area = area_border
         self.map = district_map
         self.hospitals = hospitals
-        self.emergencies = emergencies
+        self.emergencies = []
         self.cycleTime = cycle_time
 
     def get_area(self):
@@ -64,7 +64,6 @@ class Agent:
         # Here, for the fuel, potentially will have to add a function to check if the vehicle can go to the end of the
         # map and back (or sth like that)
 
-        id_number = 0
         final_vehicles = []
         min_distance = math.inf
         min_vehicle = None
@@ -95,8 +94,6 @@ class Agent:
                 min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
                 min_vehicle.set_em_location(emergency.get_location())
                 min_vehicle.set_em_hospital(min_hospital)
-                min_vehicle.set_id(id_number)
-                id_number += 1
                 final_vehicles.append(min_vehicle)
 
             min_distance = math.inf
