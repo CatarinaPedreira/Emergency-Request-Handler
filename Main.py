@@ -19,11 +19,13 @@ emergency_id = 0
 width = 0
 height = 0
 cycle_time = 1
+zone_ids = [[]]
+zone_id = 0
 # quit_switch = False
 
 
 def setup():
-    global zones, hospital_groups, agents, width, height, cycle_time
+    global zones, hospital_groups, agents, width, height, cycle_time, zone_ids, zone_id
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
     area = eval(input("Area size (as width,height): "))
@@ -44,12 +46,16 @@ def setup():
             n_columns = n_agents//i
             for m in range(n_rows):
                 zones += [],
+                zone_ids += [],
                 for n in range(n_columns):
                     zones[m] += [(), (), (), ()],
+                    zone_ids[m] += [(), (), (), ()]
                     zones[m][n][0] = (height / n_rows * m, width / n_columns * n)
                     zones[m][n][1] = (height / n_rows * m, width / n_columns * (n + 1))
                     zones[m][n][2] = (height / n_rows * (m + 1), width / n_columns * n)
                     zones[m][n][3] = (height / n_rows * (m + 1), width / n_columns * (n + 1))
+                    zone_ids[m][n] = zone_id
+                    zone_id += 1
             break
 
     for i in range(n_agents):
@@ -156,14 +162,14 @@ def allocate_to_agent(emer):
     # TODO not tested yet, should be good tho NOP is always allocating to 1
     for i in range(len(zones)):
         for j in range(len(zones[i])):
-            if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[0] <= zones[i][j][1][1]:
+            if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[1] <= zones[i][j][1][1]:
                 for agent in agents:
                     if agent.get_area() == zones[i][j]:
                         emer.set_control_tower(agent)
+                        print("Emergency nº", emergency_id, "allocated to control tower from zone", zone_ids[i][j])
                         break
                 break
 
-    print("Emergency nº", emergency_id, "allocated to control tower from zone", i)
     emer.get_control_tower().allocate_emergency(emer)
 
 
