@@ -146,6 +146,8 @@ class MedicalVehicle:
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
 
+    # TODO, this function is not being called yet. Also, shouldn't we separate this into replenish_fuel and replenish_medicine,
+    #  since we update them in different places of the code (and initial value might not be the same)?
     def replenish(self):
         self.fuel = self.max_fuel
         self.medicine = self.max_medicine
