@@ -1,4 +1,6 @@
 import random
+import signal
+import sys
 import time
 import math
 from threading import Thread
@@ -20,11 +22,12 @@ height = 0
 cycle_time = 1
 zone_ids = [[]]
 zone_id = 0
+run = True
 # quit_switch = False
 
 
 def sanitize_integer_input(arg):
-    while not isinstance(arg, int) or (isinstance(arg, int) and arg<= 0):
+    while not isinstance(arg, int) or (isinstance(arg, int) and arg <= 0):
         arg = eval(input("Invalid input. Please insert a positive integer value: "))
     return arg
 
@@ -158,7 +161,7 @@ def allocate_to_agent(emer):
 
 def perceive_emergencies():
 
-    while True:
+    while run:
         global emergency_id
         emergency_id += 1
         emergency = create_emergency(emergency_id)
@@ -169,7 +172,8 @@ def perceive_emergencies():
 ########################################################################################################################
 
 def global_time():
-    while True:
+    global run
+    while run:
         for agent in agents:
             for hospital in agent.get_hospitals():
                 for vehicle in hospital.get_medical_vehicles():
@@ -178,11 +182,22 @@ def global_time():
 
 
 thread = Thread(target=global_time)
-thread.start()
+
+
+def signal_handler(signal, frame):
+    global run, thread
+    run = False
+    print('\nThe simulation has ended')
+    if thread.is_alive():
+        thread.join()
+    sys.exit()
+
+
+signal.signal(signal.SIGINT, signal_handler)
 
 setup()
+thread.start()
 perceive_emergencies()
-
 thread.join()
 
 # def check_quit():
