@@ -92,8 +92,6 @@ def setup():
             location = (random.randint(agents[i].get_area()[0][0], agents[i].get_area()[2][0]), random.randint(agents[i].get_area()[0][1], agents[i].get_area()[1][1]))
             hospital.set_location(location)
 
-    # Hardcoded minMedicine and minFuel on MedicalVehicles (30 ei 10), can change the values if u want
-    # minMedicine, if changed, should be in accordance with MedicalVehicle.decrease_medicine(type, gravity)
     sbv_id = 0
     vmer_id = 0
     siv_id = 0
@@ -113,32 +111,6 @@ def setup():
                 siv_id += 1
                 medical_vehicles += MedicalVehicle(siv_id, "SIV", hosp),
             hosp.set_medical_vehicles(medical_vehicles)
-
-    # cycle_time = 1 # Hardcoded, vamos receber do utilizador
-    # zones = [[(0, 0), (500, 0), (0, 500), (500, 500)], [(500, 0), (1000, 0), (500, 500), (1000, 500)],
-    #          [(0, 500), (500, 500), (0, 1000), (500, 1000)], [(500, 500), (1000, 500), (500, 1000), (1000, 1000)]]
-
-
-        # Hardcoded to test, change to new version later (locations may collide, but it is extremely rare)
-        # location1 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
-        # location2 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
-        # location3 = (random.randint(zones[i][0][0], zones[i][0][0] + 500), random.randint(zones[i][0][1], zones[i][0][1] + 500))
-        # hospital_groups[i] = [Hospital(location1, 100, 10, None), Hospital(location2, 150, 10, None), Hospital(location3, 95, 10, None)]
-        # agents[i] = Agent(zones[i], zones, hospital_groups[i], None, cycle_time)
-
-    # Hardcoded minMedicine and minFuel on MedicalVehicles (30 e 10), can change the values if u want
-    # minMedicine, if changed, should be in accordance with MedicalVehicle.decrease_medicine(type, gravity)
-    # for i in range(4):
-    #     for hosp in hospital_groups[i]:
-    #         hosp.set_control_tower(agents[i])
-    #         medical_vehicles = []
-    #         for j in range(6):
-    #             medical_vehicles.append(MedicalVehicle("SBV", 100, 100, hosp, list(hosp.get_location()), 30, 10))
-    #         for j in range(4):
-    #             medical_vehicles.append(MedicalVehicle("VMER", 100, 100, hosp, list(hosp.get_location()), 30, 10))
-    #         for j in range(2):
-    #             medical_vehicles.append(MedicalVehicle("SIV", 100, 100, hosp, list(hosp.get_location()), 30, 10))
-    #         hosp.set_medical_vehicles(medical_vehicles)
 
 
 def create_emergency(e_id):
@@ -171,10 +143,6 @@ def create_emergency(e_id):
 
 
 def allocate_to_agent(emer):
-    # for i in range(len(zones)):
-    #     if zones[i][0][0] <= emer.location[0] <= zones[i][1][0] and zones[i][0][1] <= emer.location[1] <= zones[i][2][1]:
-    #         emer.set_control_tower(agents[i])
-    #         break
 
     for i in range(len(zones)):
         for j in range(len(zones[i])):
