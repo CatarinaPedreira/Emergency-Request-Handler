@@ -50,7 +50,8 @@ class Agent:
     def activate_medical_vehicles(self, final_vehicles):
         for vehicle in final_vehicles:
             vehicle.move(self.cycleTime)
-            # if vehicle.get_rest() == vehicle.get_max_hours() // 2:
+            # if vehicle.get_rest() == vehicle.get_max_hours() // 2:  # If the vehicle entered "rest" mode, needs to go to base hospital
+
 
 
     ###################
@@ -61,8 +62,7 @@ class Agent:
     # (When all hospitals don't have enough resources, ask help of another agent)
     def allocate_emergency(self, emergency):
 
-        # Here, for the fuel, potentially will have to add a function to check if the vehicle can go to the end of the
-        # map and back (or sth like that)
+        # TODO check if fuel is enough to go to emergency and then hospital
 
         final_vehicles = []
         min_distance = math.inf
