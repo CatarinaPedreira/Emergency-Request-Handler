@@ -22,7 +22,7 @@ class MedicalVehicle:
         self.emHospital = None
         self.work_km = 0
         self.max_km = 4000
-        self.rest = 1000  # TODO check later according to sleep()
+        self.rest = 1000
 
     def get_type_vehicle(self):
         return self.type_vehicle

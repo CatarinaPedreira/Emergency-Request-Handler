@@ -1,8 +1,7 @@
 import random
-import sys
 import time
 import math
-# from threading import Thread
+from threading import Thread
 # import keyboard
 import numpy
 from Agent import Agent
@@ -68,12 +67,12 @@ def setup():
                 for n in range(n_columns):
                     zones[m] += [(), (), (), ()],
                     zone_ids[m] += [(), (), (), ()]
+                    zone_id += 1
                     zones[m][n][0] = (height / n_rows * m, width / n_columns * n)
                     zones[m][n][1] = (height / n_rows * m, width / n_columns * (n + 1))
                     zones[m][n][2] = (height / n_rows * (m + 1), width / n_columns * n)
                     zones[m][n][3] = (height / n_rows * (m + 1), width / n_columns * (n + 1))
                     zone_ids[m][n] = zone_id
-                    zone_id += 1
             break
 
     for i in range(n_agents):
@@ -169,13 +168,23 @@ def perceive_emergencies():
 
 ########################################################################################################################
 
+def global_time():
+    while True:
+        for agent in agents:
+            for hospital in agent.get_hospitals():
+                for vehicle in hospital.get_medical_vehicles():
+                    vehicle.check_vehicle_status()
+        time.sleep(cycle_time / 100)
+
+
+thread = Thread(target=global_time)
+thread.start()
+
 setup()
 perceive_emergencies()
 
+thread.join()
 
-# thread = Thread(target=check_quit)
-# thread.start()
-# thread.join()
 # def check_quit():
 #     global quit_switch
 #     keyboard.wait("q")
