@@ -20,9 +20,9 @@ class MedicalVehicle:
         self.minFuel = 200
         self.emLocation = None
         self.emHospital = None
-        self.workHours = 0
-        self.maxHours = 8
-        self.rest = self.maxHours // 2
+        self.work_km = 0
+        self.max_km = 4000
+        self.rest = 1000  # TODO check later according to sleep()
 
     def get_type_vehicle(self):
         return self.type_vehicle
@@ -54,14 +54,14 @@ class MedicalVehicle:
         # gravity varies on a scale of 1 to 10; type can be LT or non-LT
         if emer_type == "Life-threatening":
             e_type = 2
-        else:   # emer_type = "Non Life-threatening"
+        else:
             e_type = random.randint(0, 1)
 
         amount = random.randint(e_type * gravity, e_type * gravity + 10) # medicine needed will be, at max, 30
 
         self.medicine = self.medicine - amount
         if self.medicine <= self.minMedicine:
-            self.change_status("Replenish")  # ainda faz esta emergencia como "Available" mas na proxima ja vai estar em modo "Replenish"
+            self.change_status("Replenish")
 
     # In case the vehicle changes zone and is now controlled by another hospital
     def change_hospital(self, current):
@@ -79,8 +79,8 @@ class MedicalVehicle:
                 self.rest -= 1
             else:
                 self.status = 'Available'
-                self.rest = self.maxHours // 2
-        return self.status
+                self.rest = 1000
+                self.work_km = 0
 
     def get_location(self):
         return self.location
@@ -97,17 +97,14 @@ class MedicalVehicle:
     def set_em_hospital(self, hospital):
         self.emHospital = hospital
 
-    def update_work_hours(self):
-        self.workHours += 1
+    def update_work_km(self, amount):
+        self.work_km += amount
 
-        if self.workHours == self.maxHours:
-            self.change_status("Rest")
+    def get_work_km(self):
+        return self.work_km
 
-    def get_work_hours(self):
-        return self.workHours
-
-    def get_max_hours(self):
-        return self.maxHours
+    def get_max_km(self):
+        return self.max_km
 
     def get_rest(self):
         return self.rest
@@ -125,6 +122,7 @@ class MedicalVehicle:
 
         self.location = start
         self.decrease_fuel(1)
+        self.update_work_km(1)
 
     def move(self, cycle_time):
         self.change_status("Assigned")
@@ -141,15 +139,24 @@ class MedicalVehicle:
             self.update_location(self.location, self.emHospital.get_location())
             time.sleep(cycle_time / 1000)
 
-        if self.status != "Replenish" and self.status != "Rest":  # TODO status="Rest" probs vai ser alterado
-            self.change_status("Available")
+        print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
 
-        print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital", "\n")
+        # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
+        if self.status == 'Replenish':
+            self.replenish()
+            print(self.type_vehicle, "vehicle", self.id, "replenished fuel and medicine at the hospital")
 
-    # TODO, this function is not being called yet. Also, shouldn't we separate this into replenish_fuel and replenish_medicine,
-    #  since we update them in different places of the code (and initial value might not be the same)?
+        elif self.status == 'Assigned':
+            self.change_status('Available')
+
+        if self.work_km >= self.max_km:
+            self.change_status('Rest')
+            print(self.type_vehicle, "vehicle", self.id, "entered Rest mode")
+
+        print('\n')
+
+
     def replenish(self):
         self.fuel = self.max_fuel
         self.medicine = self.max_medicine
         self.change_status("Available")
-
