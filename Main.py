@@ -158,8 +158,6 @@ def allocate_to_agent(emer):
     #         emer.set_control_tower(agents[i])
     #         break
 
-    # this comment section is for when we start accepting input from the command line
-    # TODO not tested yet, should be good tho NOP is always allocating to 1
     for i in range(len(zones)):
         for j in range(len(zones[i])):
             if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[1] <= zones[i][j][1][1]:
