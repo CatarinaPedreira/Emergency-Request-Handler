@@ -23,7 +23,6 @@ cycle_time = 1
 zone_ids = [[]]
 zone_id = 0
 run = True
-# quit_switch = False
 
 
 def sanitize_integer_input(arg):
@@ -199,10 +198,3 @@ setup()
 thread.start()
 perceive_emergencies()
 thread.join()
-
-# def check_quit():
-#     global quit_switch
-#     keyboard.wait("q")
-#     quit_switch = True
-#     print("Goodbye!")
-# Na main, check se o quit_switch esta = True
