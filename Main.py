@@ -25,32 +25,43 @@ zone_id = 0
 run = True
 
 
+def check_if_comma(string):
+    while "," not in string:
+        string = input("Invalid input. Please insert two positive integer values (as width,height): ")
+    return string.split(",")
+
+
+# isnumeric () returns True if all characters in the string are numeric characters, so negative numbers are not accepted
+# "" checks if enter was pressed
 def sanitize_integer_input(arg):
-    while not isinstance(arg, int) or (isinstance(arg, int) and arg <= 0):
-        arg = eval(input("Invalid input. Please insert a positive integer value: "))
-    return arg
+    while not arg.isnumeric() or arg == "0" or arg == "":
+        arg = input("Invalid input. Please insert a positive integer value: ")
+    return int(arg)
 
 
 def sanitize_area_input(area):
-    while not isinstance(area, tuple) or not isinstance(area[0], int) or (isinstance(area[0], int) and area[0] <= 0) \
-            or not isinstance(area[1], int) or (isinstance(area[1], int) and area[1] <= 0):
-        area = eval(input("Invalid input. Please insert two positive integer values (as width,height): "))
-    return area
+    area = check_if_comma(area)
+    while (not area[0].isnumeric()) or (not area[1].isnumeric()) or area[0] == "0" or area[1] == "0":
+        area = check_if_comma(area)
+
+    area[0] = int(area[0])
+    area[1] = int(area[1])
+    return tuple(area)
 
 
 def setup():
     global zones, hospital_groups, agents, width, height, cycle_time, zone_ids, zone_id
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
-    area = eval(input("Area size (as width,height): "))
+    area = input("Area size (as width,height): ")
     area = sanitize_area_input(area)
-    n_agents = eval(input("Number of Control Towers: "))
+    n_agents = input("Number of Control Towers: ")
     n_agents = sanitize_integer_input(n_agents)
-    n_hospitals = eval(input("Number of Hospitals per zone: "))
+    n_hospitals = input("Number of Hospitals per zone: ")
     n_hospitals = sanitize_integer_input(n_hospitals)
-    n_vehicles = eval(input("Number of Medical Vehicles per hospital: "))
+    n_vehicles = input("Number of Medical Vehicles per hospital: ")
     n_vehicles = sanitize_integer_input(n_vehicles)
-    cycle_time = eval(input("Frequency of Medical Emergencies (in seconds): "))
+    cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
     cycle_time = sanitize_integer_input(cycle_time)
 
     width = area[0]
