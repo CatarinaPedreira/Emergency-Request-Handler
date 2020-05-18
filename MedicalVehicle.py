@@ -73,7 +73,7 @@ class MedicalVehicle:
     def change_status(self, status):
         self.status = status
 
-    def check_vehicle_status(self):     # TODO nao deveria ser algo chamado a cada tik que fizesse update? Rever como descer o rest
+    def check_vehicle_status(self):
         if self.status == 'Rest':
             if self.rest > 0:
                 self.rest -= 1
@@ -154,7 +154,6 @@ class MedicalVehicle:
             print(self.type_vehicle, "vehicle", self.id, "entered Rest mode")
 
         print('\n')
-
 
     def replenish(self):
         self.fuel = self.max_fuel

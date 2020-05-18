@@ -170,7 +170,7 @@ def perceive_emergencies():
 
 ########################################################################################################################
 
-def global_time():
+def global_check_and_update():
     global run
     while run:
         for agent in agents:
@@ -180,7 +180,7 @@ def global_time():
         time.sleep(cycle_time / 100)
 
 
-thread = Thread(target=global_time)
+thread = Thread(target=global_check_and_update)
 
 
 def signal_handler(signal, frame):
