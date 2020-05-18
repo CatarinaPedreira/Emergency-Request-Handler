@@ -28,11 +28,19 @@ class Agent:
     def add_emergency(self, emergency):
         self.emergencies.append(emergency)
 
-    def filter_medical_vehicles(self):
+    def check_enough_medicine(self, vehicle, emergency):
+        return vehicle.get_medicine() > vehicle.medicine_needed(emergency.get_gravity(), emergency.get_type())
+
+    def check_enough_fuel(self, vehicle, emergency, hospital):
+        return vehicle.get_fuel() > (manhattan_distance(vehicle, emergency) + manhattan_distance(emergency, hospital))
+
+    def filter_medical_vehicles(self, emergency, min_hospital):
         possible_ambulances = []
         for hospital in self.hospitals:
             for medical_vehicle in hospital.medicalVehicles:
-                if medical_vehicle.get_status() == "Available":
+                if medical_vehicle.get_status() == "Available"\
+                        and self.check_enough_medicine(medical_vehicle, emergency)\
+                        and self.check_enough_fuel(medical_vehicle, emergency, min_hospital):
                     possible_ambulances.append(medical_vehicle)
 
         return possible_ambulances
@@ -49,10 +57,8 @@ class Agent:
 
     def activate_medical_vehicles(self, final_vehicles):
         for vehicle in final_vehicles:
+            # TODO Maybe create new thread here, before the vehicle moves?
             vehicle.move(self.cycleTime)
-            # TODO if vehicle.get_rest() == vehicle.get_max_hours() // 2:  # If the vehicle entered "rest" mode, needs to go to base hospital
-
-
 
     ###################
     # Agent's Decision#
@@ -62,13 +68,11 @@ class Agent:
     # (When all hospitals don't have enough resources, ask help of another agent)
     def allocate_emergency(self, emergency):
 
-        # TODO check if fuel is enough to go to emergency and then hospital
-
         final_vehicles = []
         min_distance = math.inf
         min_vehicle = None
         min_hospital = self.check_closest_hospital(emergency, math.inf)
-        possible_ambulances = self.filter_medical_vehicles()
+        possible_ambulances = self.filter_medical_vehicles(emergency, min_hospital)
 
         for i in range(emergency.get_num_patients()):
             for possibility in possible_ambulances:
@@ -98,7 +102,7 @@ class Agent:
             min_vehicle = None
 
         if len(final_vehicles) == 1:
-            print(1, "medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
+            print("1 medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
         else:
             print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
         self.activate_medical_vehicles(final_vehicles)

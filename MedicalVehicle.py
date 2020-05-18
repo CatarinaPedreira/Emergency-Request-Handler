@@ -24,6 +24,9 @@ class MedicalVehicle:
         self.max_km = 4000
         self.rest = 1000
 
+    def get_id(self):
+        return self.id
+
     def get_type_vehicle(self):
         return self.type_vehicle
 
@@ -50,15 +53,18 @@ class MedicalVehicle:
         if self.fuel <= self.minFuel:
             self.change_status("Replenish")
 
-    def decrease_medicine(self, gravity, emer_type):
+    def medicine_needed(self, gravity, emer_type):
         # gravity varies on a scale of 1 to 10; type can be LT or non-LT
         if emer_type == "Life-threatening":
             e_type = 2
         else:
             e_type = random.randint(0, 1)
 
-        amount = random.randint(e_type * gravity, e_type * gravity + 10) # medicine needed will be, at max, 30
+        return random.randint(e_type * gravity, e_type * gravity + 10) # medicine needed will be, at max, 30
 
+    def decrease_medicine(self, gravity, emer_type):
+
+        amount = self.medicine_needed(gravity, emer_type)
         self.medicine = self.medicine - amount
         if self.medicine <= self.minMedicine:
             self.change_status("Replenish")
@@ -115,10 +121,11 @@ class MedicalVehicle:
             start[0] += 1
         elif start[0] > dest[0]:
             start[0] -= 1
-        if start[1] < dest[1]:
-            start[1] += 1
-        elif start[1] > dest[1]:
-            start[1] -= 1
+        else:
+            if start[1] < dest[1]:
+                start[1] += 1
+            elif start[1] > dest[1]:
+                start[1] -= 1
 
         self.location = start
         self.decrease_fuel(1)
@@ -141,7 +148,8 @@ class MedicalVehicle:
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
 
-        # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
+
+    # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
         if self.status == 'Replenish':
             self.replenish()
             print(self.type_vehicle, "vehicle", self.id, "replenished fuel and medicine at the hospital")
