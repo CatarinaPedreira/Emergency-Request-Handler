@@ -47,13 +47,20 @@ class Agent:
 
     def check_closest_hospital(self, emergency, min_distance):
         min_hospital = None
+        allocated_patients = 0
         for hospital in self.hospitals:
             hospital_dist = manhattan_distance(hospital, emergency)
-            if hospital_dist < min_distance:
+            if hospital_dist < min_distance and not hospital.is_full():
                 min_distance = hospital_dist
                 min_hospital = hospital
+                allocated_patients = hospital.get_slots() - emergency.get_num_patients()
 
-        return min_hospital
+        if allocated_patients >= 0:
+            min_hospital.update_curr_capacity(emergency.get_num_patients())
+        else:
+            min_hospital.update_curr_capacity(min_hospital.get_slots())
+
+        return min_hospital, allocated_patients
 
     def activate_medical_vehicles(self, final_vehicles):
         for vehicle in final_vehicles:
@@ -67,42 +74,61 @@ class Agent:
     # Not considering collaboration between agents yet
     # (When all hospitals don't have enough resources, ask help of another agent)
     def allocate_emergency(self, emergency):
-
+        patients = -1
         final_vehicles = []
         min_distance = math.inf
         min_vehicle = None
-        min_hospital = self.check_closest_hospital(emergency, math.inf)
-        possible_ambulances = self.filter_medical_vehicles(emergency, min_hospital)
+        patients_per_hosp = []
+        min_hospital = []
+        possible_ambulances = []
+        # possible_ambulances[0] tem as ambulancias do min_hospital[0] e o
+        # patients_per_hosp[0] tem os pacientes que ficaram no min_hospital[0]
 
-        for i in range(emergency.get_num_patients()):
-            for possibility in possible_ambulances:
+        while patients < 0:
+            result = self.check_closest_hospital(emergency, math.inf)
+            min_hospital.append(result[0])
+            patients = result[1]
+            if patients >= 0:
+                patients_per_hosp.append(emergency.get_num_patients())  # quando todos os pacientes ficam no mesmo hospital
+            else:
+                patients_per_hosp.append(emergency.get_num_patients() + patients)  # quando apenas ficam alguns dos pacientes naquele hospital
 
-                if len(emergency.get_type_vehicle()) == 1 and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle():
-                    manhattan_dist = manhattan_distance(possibility, emergency)
-                    if manhattan_dist < min_distance:
-                        min_distance = manhattan_dist
-                        min_vehicle = possibility
+        for hospital in min_hospital:
+            possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital))
 
-                elif len(emergency.get_type_vehicle()) > 1:
-                    for type_v in emergency.get_type_vehicle():
-                        if type_v == possibility.get_type_vehicle():
+        for i in range(len(patients_per_hosp)):
+            print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
+            for j in range(patients_per_hosp[i]):
+                for h_possibilities in possible_ambulances:
+                    for possibility in h_possibilities:
+
+                        if len(emergency.get_type_vehicle()) == 1 and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle():
                             manhattan_dist = manhattan_distance(possibility, emergency)
                             if manhattan_dist < min_distance:
                                 min_distance = manhattan_dist
                                 min_vehicle = possibility
 
-            if min_vehicle is not None:
-                possible_ambulances.remove(min_vehicle)
-                min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
-                min_vehicle.set_em_location(emergency.get_location())
-                min_vehicle.set_em_hospital(min_hospital)
-                final_vehicles.append(min_vehicle)
+                        elif len(emergency.get_type_vehicle()) > 1:
+                            for type_v in emergency.get_type_vehicle():
+                                if type_v == possibility.get_type_vehicle():
+                                    manhattan_dist = manhattan_distance(possibility, emergency)
+                                    if manhattan_dist < min_distance:
+                                        min_distance = manhattan_dist
+                                        min_vehicle = possibility
 
-            min_distance = math.inf
-            min_vehicle = None
+                    if min_vehicle is not None:
+                        h_possibilities.remove(min_vehicle)
+                        min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
+                        min_vehicle.set_em_location(emergency.get_location())
+                        min_vehicle.set_em_hospital(min_hospital[i])
+                        final_vehicles.append(min_vehicle)
 
-        if len(final_vehicles) == 1:
-            print("1 medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
-        else:
-            print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
-        self.activate_medical_vehicles(final_vehicles)
+                    min_distance = math.inf
+                    min_vehicle = None
+
+            if len(final_vehicles) == 1:
+                print("1 medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
+            else:
+                print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
+
+            self.activate_medical_vehicles(final_vehicles)

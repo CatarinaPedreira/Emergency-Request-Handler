@@ -1,10 +1,15 @@
 class Hospital:
 
-    def __init__(self):
+    def __init__(self, h_id):
+        self.h_id = h_id
         self.location = ()
         self.controlTower = None
-        self.maxCapacity = self.currCapacity = 100
+        self.maxCapacity = 100
+        self.currCapacity = 0
         self.medicalVehicles = []
+
+    def get_id(self):
+        return self.h_id
 
     def get_location(self):
         return self.location
@@ -31,4 +36,10 @@ class Hospital:
         self.medicalVehicles = medical_vehicles
 
     def update_curr_capacity(self, amount):
-        self.currCapacity = self.currCapacity + amount
+        self.currCapacity += amount
+
+    def is_full(self):
+        return self.currCapacity >= self.maxCapacity
+
+    def get_slots(self):
+        return self.maxCapacity - self.currCapacity

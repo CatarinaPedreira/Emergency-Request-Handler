@@ -88,10 +88,12 @@ def setup():
                     zone_ids[m][n] = zone_id
             break
 
+    hosp_id = 0
     for i in range(n_agents):
         hospital_groups += [],
         for j in range(n_hospitals):
-            hospital_groups[i] += Hospital(),
+            hosp_id += 1
+            hospital_groups[i] += Hospital(hosp_id),
         column = i
         row = 0
         while column >= n_columns:
