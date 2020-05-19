@@ -111,17 +111,17 @@ def setup():
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])
             medical_vehicles = []
-            d1 = math.ceil(n_vehicles * 0.8)
+            d1 = math.ceil(n_vehicles * 0.05)
             for j in range(d1):
                 sbv_id += 1
-                medical_vehicles += MedicalVehicle(sbv_id, "SBV", hosp),
+                medical_vehicles += MedicalVehicle(sbv_id, "SIV", hosp),
             d2 = math.ceil(n_vehicles * 0.15)
             for j in range(d2):
                 vmer_id += 1
                 medical_vehicles += MedicalVehicle(vmer_id, "VMER", hosp),
             for j in range(n_vehicles - d1 - d2):
                 siv_id += 1
-                medical_vehicles += MedicalVehicle(siv_id, "SIV", hosp),
+                medical_vehicles += MedicalVehicle(siv_id, "SBV", hosp),
             hosp.set_medical_vehicles(medical_vehicles)
 
 
