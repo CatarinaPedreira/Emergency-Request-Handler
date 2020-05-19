@@ -45,7 +45,7 @@ class Agent:
 
         return possible_ambulances
 
-    def check_closest_hospital(self, emergency, min_distance):
+    def check_closest_hospital(self, emergency, min_distance, patient_counter):
         min_hospital = None
         allocated_patients = 0
         for hospital in self.hospitals:
@@ -53,10 +53,10 @@ class Agent:
             if hospital_dist < min_distance and not hospital.is_full():
                 min_distance = hospital_dist
                 min_hospital = hospital
-                allocated_patients = hospital.get_slots() - emergency.get_num_patients()
+                allocated_patients = hospital.get_slots() - patient_counter
 
         if allocated_patients >= 0:
-            min_hospital.update_curr_capacity(emergency.get_num_patients())
+            min_hospital.update_curr_capacity(patient_counter)
         else:
             min_hospital.update_curr_capacity(min_hospital.get_slots())
 
@@ -73,7 +73,7 @@ class Agent:
 
     # Not considering collaboration between agents yet
     # (When all hospitals don't have enough resources, ask help of another agent)
-    def allocate_emergency(self, emergency):
+    def allocate_emergency(self, emergency, patient_counter):
         patients = -1
         final_vehicles = []
         min_distance = math.inf
@@ -85,19 +85,20 @@ class Agent:
         # patients_per_hosp[0] tem os pacientes que ficaram no min_hospital[0]
 
         while patients < 0:
-            result = self.check_closest_hospital(emergency, math.inf)
+            result = self.check_closest_hospital(emergency, math.inf, patient_counter)
             min_hospital.append(result[0])
             patients = result[1]
             if patients >= 0:
-                patients_per_hosp.append(emergency.get_num_patients())  # quando todos os pacientes ficam no mesmo hospital
+                patients_per_hosp.append(patient_counter)  # quando todos os pacientes ficam no mesmo hospital
             else:
-                patients_per_hosp.append(emergency.get_num_patients() + patients)  # quando apenas ficam alguns dos pacientes naquele hospital
+                patients_per_hosp.append(patient_counter + patients)  # quando apenas ficam alguns dos pacientes naquele hospital
 
         for hospital in min_hospital:
             possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital))
 
         for i in range(len(patients_per_hosp)):
-            print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
+            if patient_counter == emergency.get_num_patients():
+                print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
             for j in range(patients_per_hosp[i]):
                 for h_possibilities in possible_ambulances:
                     for possibility in h_possibilities:
@@ -132,3 +133,7 @@ class Agent:
                 print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
 
             self.activate_medical_vehicles(final_vehicles)
+        patient_counter -= len(final_vehicles)
+        if patient_counter < 0:
+            patient_counter = 0
+        return patient_counter

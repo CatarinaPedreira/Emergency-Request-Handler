@@ -167,8 +167,9 @@ def allocate_to_agent(emer):
                         print("Emergency nº", emergency_id, "allocated to control tower from zone", zone_ids[i][j])
                         break
                 break
-
-    emer.get_control_tower().allocate_emergency(emer)
+    patients = emer.get_num_patients()
+    while patients > 0:
+        patients = emer.get_control_tower().allocate_emergency(emer, patients)
 
 
 def perceive_emergencies():
