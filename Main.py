@@ -101,7 +101,7 @@ def setup():
 
     for i in range(n_agents):
         for hospital in agents[i].get_hospitals():
-            location = (random.randint(agents[i].get_area()[0][0], agents[i].get_area()[2][0]), random.randint(agents[i].get_area()[0][1], agents[i].get_area()[1][1]))
+            location = (random.randint(math.ceil(agents[i].get_area()[0][0]), math.floor(agents[i].get_area()[2][0])), random.randint(math.ceil(agents[i].get_area()[0][1]), math.floor(agents[i].get_area()[1][1])))
             hospital.set_location(location)
 
     sbv_id = 0
