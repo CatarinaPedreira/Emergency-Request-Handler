@@ -1,4 +1,11 @@
 import math
+from threading import Thread
+
+
+def wait_threads(threads):
+    for thread in threads:
+        if thread.is_alive():
+            thread.join()
 
 
 class Agent:
@@ -62,9 +69,13 @@ class Agent:
         return min_hospital, allocated_patients
 
     def activate_medical_vehicles(self, final_vehicles):
+        threads = []
         for vehicle in final_vehicles:
-            # TODO Maybe create new thread here, before the vehicle moves?
-            vehicle.move(self.cycleTime)
+            thread = Thread(target=vehicle.move, args=(self.cycleTime,))
+            thread.start()
+            threads.append(thread)
+
+        wait_threads(threads)
 
     ###################
     # Agent's Decision#

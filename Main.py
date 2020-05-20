@@ -4,7 +4,6 @@ import sys
 import time
 import math
 from threading import Thread
-# import keyboard
 import numpy
 from Agent import Agent
 from Emergency import Emergency

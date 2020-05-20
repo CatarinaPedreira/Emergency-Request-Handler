@@ -148,7 +148,6 @@ class MedicalVehicle:
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
 
-
     # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
         if self.status == 'Replenish':
             self.replenish()
@@ -160,8 +159,6 @@ class MedicalVehicle:
         if self.work_km >= self.max_km:
             self.change_status('Rest')
             print(self.type_vehicle, "vehicle", self.id, "entered Rest mode")
-
-        print('\n')
 
     def replenish(self):
         self.fuel = self.max_fuel
