@@ -183,7 +183,6 @@ def allocate_to_agent(emer):
 
     emer_agents = []
     indexes = []
-    decision = None
 
     for i in range(len(zones)):
         for j in range(len(zones[i])):
