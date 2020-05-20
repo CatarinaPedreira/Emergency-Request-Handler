@@ -156,17 +156,54 @@ def create_emergency(e_id):
     return emergency
 
 
+def get_agent_from_hospital(hosp):
+    for agent in agents:
+        for hospital in agent.hospitals:
+            if hosp == hospital:
+                return agent
+
+
+def decide_frontier_agent(a_possibilities, emer):
+    min_distance = math.inf
+    min_vehicle = None
+    for agent in a_possibilities:
+        for hospital in agent.get_hospitals():
+            for vehicle in hospital.get_medical_vehicles():
+                dist = agent.manhattan_distance(vehicle, emer)
+                if dist < min_distance:
+                    min_distance = dist
+                    min_vehicle = vehicle
+
+    agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
+    emer.set_control_tower(agent)
+    return agent
+
+
 def allocate_to_agent(emer):
+
+    emer_agents = []
+    indexes = []
+    decision = None
 
     for i in range(len(zones)):
         for j in range(len(zones[i])):
             if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[1] <= zones[i][j][1][1]:
                 for agent in agents:
                     if agent.get_area() == zones[i][j]:
-                        emer.set_control_tower(agent)
-                        print("Emergency nº", emergency_id, "allocated to control tower from zone", zone_ids[i][j])
+                        emer_agents.append(agent)
+                        indexes.append((i, j))
                         break
                 break
+
+    if len(emer_agents) > 1:
+        decision = decide_frontier_agent(emer_agents, emer)
+    else:  # Len will never be 0 given the boundaries we give to the locations of emergencies
+        decision = emer_agents[0]
+        emer.set_control_tower(decision)
+
+    print("Emergency nº", emergency_id, "allocated to control tower from zone",
+          zone_ids[(indexes[emer_agents.index(decision)][0])][(indexes[emer_agents.index(decision)][1])])  # zone_ids[row,column]
+
     patients = emer.get_num_patients()
     while patients > 0:
         patients = emer.get_control_tower().allocate_emergency(emer, patients)

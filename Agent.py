@@ -1,10 +1,6 @@
 import math
 
 
-def manhattan_distance(a, b):
-    return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
-
-
 class Agent:
     def __init__(self, area_border, district_map, hospitals, cycle_time):
         self.area = area_border
@@ -12,6 +8,9 @@ class Agent:
         self.hospitals = hospitals
         self.emergencies = []
         self.cycleTime = cycle_time
+
+    def manhattan_distance(self, a, b):
+        return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
 
     def get_area(self):
         return self.area
@@ -32,7 +31,7 @@ class Agent:
         return vehicle.get_medicine() > vehicle.medicine_needed(emergency.get_gravity(), emergency.get_type())
 
     def check_enough_fuel(self, vehicle, emergency, hospital):
-        return vehicle.get_fuel() > (manhattan_distance(vehicle, emergency) + manhattan_distance(emergency, hospital))
+        return vehicle.get_fuel() > (self.manhattan_distance(vehicle, emergency) + self.manhattan_distance(emergency, hospital))
 
     def filter_medical_vehicles(self, emergency, min_hospital):
         possible_ambulances = []
@@ -49,7 +48,7 @@ class Agent:
         min_hospital = None
         allocated_patients = 0
         for hospital in self.hospitals:
-            hospital_dist = manhattan_distance(hospital, emergency)
+            hospital_dist = self.manhattan_distance(hospital, emergency)
             if hospital_dist < min_distance and not hospital.is_full():
                 min_distance = hospital_dist
                 min_hospital = hospital
@@ -104,7 +103,7 @@ class Agent:
                     for possibility in h_possibilities:
 
                         if len(emergency.get_type_vehicle()) == 1 and emergency.get_type_vehicle()[0] == possibility.get_type_vehicle():
-                            manhattan_dist = manhattan_distance(possibility, emergency)
+                            manhattan_dist = self.manhattan_distance(possibility, emergency)
                             if manhattan_dist < min_distance:
                                 min_distance = manhattan_dist
                                 min_vehicle = possibility
@@ -112,7 +111,7 @@ class Agent:
                         elif len(emergency.get_type_vehicle()) > 1:
                             for type_v in emergency.get_type_vehicle():
                                 if type_v == possibility.get_type_vehicle():
-                                    manhattan_dist = manhattan_distance(possibility, emergency)
+                                    manhattan_dist = self.manhattan_distance(possibility, emergency)
                                     if manhattan_dist < min_distance:
                                         min_distance = manhattan_dist
                                         min_vehicle = possibility
