@@ -1,5 +1,7 @@
+import os
 import random
 import signal
+import subprocess
 import sys
 import time
 import math
@@ -22,6 +24,7 @@ cycle_time = 1
 zone_ids = [[]]
 zone_id = 0
 run = True
+emergency_queue = []
 
 
 def check_if_comma(string):
@@ -150,8 +153,6 @@ def create_emergency(e_id):
             vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.7, 0.20, 0.10])
 
     emergency = Emergency(e_id, location, e_type, patients, gravity, vehicles)
-    print("-------------------------------New Emergency-------------------------------")
-    print(emergency)
     return emergency
 
 
@@ -208,11 +209,16 @@ def allocate_to_agent(emer):
 
 
 def perceive_emergencies():
-
+    global emergency_id, emergency_queue
     while run:
-        global emergency_id
         emergency_id += 1
-        emergency = create_emergency(emergency_id)
+        if len(emergency_queue) != 0:
+            emergency = emergency_queue.pop(0)
+            emergency.set_eid(emergency_id)
+        else:
+            emergency = create_emergency(emergency_id)
+        print("-------------------------------New Emergency-------------------------------")
+        print(emergency)
         time.sleep(cycle_time)
         allocate_to_agent(emergency)
 
@@ -229,21 +235,62 @@ def global_check_and_update():
         time.sleep(cycle_time / 100)
 
 
+def check_new_input():
+    global emergency_queue, p
+    while run:
+        args = str(width) + "," + str(height)
+        code = 'start /wait python -c \"from Input import setup; setup(' + args + ')\"'
+        p = subprocess.Popen(code, shell=True)
+        p.wait()
+        if os.path.exists("temp.txt"):
+            f = open("temp.txt", "r")
+            for line in f:
+                if line.startswith("Location:"):
+                    location = line.split(": ")[1].replace('\n', '').replace(')', '').replace('(', '').replace(' ', '')
+                    location = location.split(",")
+                    location[0] = int(location[0])
+                    location[1] = int(location[1])
+                    location = tuple(location)
+                elif line.startswith("Type:"):
+                    e_type = line.split(": ")[1].replace('\n', '')
+                elif line.startswith("Patients:"):
+                    patients = int(line.split(": ")[1].replace('\n', ''))
+                elif line.startswith("Gravity:"):
+                    gravity = int(line.split(": ")[1].replace('\n', ''))
+                elif line.startswith("Type of vehicles:"):
+                    vehicle_type = []
+                    vehicles = line.split(": ")[1].replace('\n', '').replace(']', '').replace('[', '').replace(' ', '').replace('\'', '')
+                    vehicles = vehicles.split(",")
+                    for v in vehicles:
+                        vehicle_type.append(v)
+            f.close()
+            os.remove("temp.txt")
+            e = Emergency(-1, location, e_type, patients, gravity, vehicle_type)
+            emergency_queue.append(e)
+
+
 thread = Thread(target=global_check_and_update)
+thread2 = Thread(target=check_new_input)
 
 
 def signal_handler(signal, frame):
-    global run, thread
+    global run, thread, p
     run = False
-    print('\nThe simulation has ended')
     if thread.is_alive():
         thread.join()
+    if thread2.is_alive():
+        string = "Taskkill /PID " + str(p.pid) + " /F"
+        subprocess.check_output(string)
+        thread2.join()
+    print('\nThe simulation has ended')
     sys.exit()
 
 
 signal.signal(signal.SIGINT, signal_handler)
 
+
 setup()
+thread2.start()
 thread.start()
 perceive_emergencies()
 thread.join()

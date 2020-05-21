@@ -14,10 +14,13 @@ class Emergency:
         self.controlTower = None
 
     def __repr__(self):
-        return "Emergency Id: " + str(self.e_id) + "\nType: " + str(self.type) + "\nLocation: " + str(self.location) + "\nPatients: " + str(self.numPatients) + "\nType of vehicles: " + str(self.typeVehicle)
+        return "Emergency Id: " + str(self.e_id) + "\nType: " + str(self.type) + "\nLocation: " + str(self.location) + "\nPatients: " + str(self.numPatients) + "\nGravity: " + str(self.gravity) + "\nType of vehicles: " + str(self.typeVehicle)
 
     def get_eid(self):
         return self.e_id
+
+    def set_eid(self, e_id):
+        self.e_id = e_id
 
     def get_location(self):
         return self.location
