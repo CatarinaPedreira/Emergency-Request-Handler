@@ -101,7 +101,7 @@ def setup():
         while column >= n_columns:
             row += 1
             column -= n_columns
-        agents += Agent(zones[row][column], zones, hospital_groups[i], cycle_time),
+        agents += Agent(zones[row][column], zones, hospital_groups[i]),
 
     for i in range(n_agents):
         for hospital in agents[i].get_hospitals():
@@ -232,7 +232,7 @@ def global_check_and_update():
             for hospital in agent.get_hospitals():
                 for vehicle in hospital.get_medical_vehicles():
                     vehicle.check_vehicle_status()
-        time.sleep(cycle_time / 100)
+        time.sleep(1)    # wait to decrease ambulances rest
 
 
 def check_new_input():
@@ -288,9 +288,10 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
 setup()
-thread2.start()
+if len(sys.argv) > 1:
+    if sys.argv[1] == "-t":     # to open with terminal input use flag -t: py Main.py -t
+        thread2.start()
 thread.start()
 perceive_emergencies()
 thread.join()

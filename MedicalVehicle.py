@@ -21,8 +21,8 @@ class MedicalVehicle:
         self.emLocation = None
         self.emHospital = None
         self.work_km = 0
-        self.max_km = 4000
-        self.rest = 1000
+        self.max_km = 6000  # can move always for 1 min straight
+        self.rest = 30  # stays 30 seconds in rest
 
     def get_id(self):
         return self.id
@@ -80,12 +80,16 @@ class MedicalVehicle:
         self.status = status
 
     def check_vehicle_status(self):
-        if self.status == 'Rest':
+        if self.status == 'Available' and self.location == self.emHospital and self.work_km > 0:
+            self.work_km -= 10
+            if self.work_km < 0:
+                self.work_km = 0
+        elif self.status == 'Rest':
             if self.rest > 0:
                 self.rest -= 1
             else:
                 self.status = 'Available'
-                self.rest = 1000
+                self.rest = 30
                 self.work_km = 0
 
     def get_location(self):
@@ -131,20 +135,20 @@ class MedicalVehicle:
         self.decrease_fuel(1)
         self.update_work_km(1)
 
-    def move(self, cycle_time):
+    def move(self):
         self.change_status("Assigned")
 
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(cycle_time / 1000)
+            time.sleep(1/100)    # ambulances move 1 in 1 ms
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
 
         # Move from emergency location to emergency's hospital
         while not equal_locations(self.location, self.emHospital.get_location()):
             self.update_location(self.location, self.emHospital.get_location())
-            time.sleep(cycle_time / 1000)
+            time.sleep(1/100)
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
 

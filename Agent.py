@@ -9,12 +9,11 @@ def wait_threads(threads):
 
 
 class Agent:
-    def __init__(self, area_border, district_map, hospitals, cycle_time):
+    def __init__(self, area_border, district_map, hospitals):
         self.area = area_border
         self.map = district_map
         self.hospitals = hospitals
         self.emergencies = []
-        self.cycleTime = cycle_time
 
     def manhattan_distance(self, a, b):
         return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
@@ -62,6 +61,8 @@ class Agent:
                 allocated_patients = hospital.get_slots() - patient_counter
 
         if allocated_patients >= 0:
+            if min_hospital is None:
+                pass    # TODO fix this hospital can't be none
             min_hospital.update_curr_capacity(patient_counter)
         else:
             min_hospital.update_curr_capacity(min_hospital.get_slots())
@@ -71,7 +72,7 @@ class Agent:
     def activate_medical_vehicles(self, final_vehicles):
         threads = []
         for vehicle in final_vehicles:
-            thread = Thread(target=vehicle.move, args=(self.cycleTime,))
+            thread = Thread(target=vehicle.move)
             thread.start()
             threads.append(thread)
 
