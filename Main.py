@@ -1,3 +1,4 @@
+from Patient import Patient
 import os
 import random
 import signal
@@ -26,6 +27,8 @@ zone_id = 0
 run = True
 emergency_queue = []
 flag_ot = False
+patients_dict = {}
+patient_id = 0
 
 
 def check_if_comma(string):
@@ -127,6 +130,7 @@ def setup():
 
 
 def create_emergency(e_id):
+    global patients_dict, patient_id
     e_type = random.choice(emergency_types)
 
     patients = 100     # just a big number
@@ -135,6 +139,11 @@ def create_emergency(e_id):
 
     location = (random.randint(0, width), random.randint(0, height))
     gravity = random.randint(1, 10)
+
+    for i in range(patients):
+        patient_id += 1
+        patients_dict[patient_id] = Patient(patient_id, e_id, gravity)
+        print(patients_dict[patient_id].get_p_id(), patients_dict[patient_id].get_e_id(), patients_dict[patient_id].gravity)
 
     vehicles = ["VMER"]
     if e_type == "Non life-threatening":
@@ -182,6 +191,7 @@ def decide_frontier_agent(a_possibilities, emer):
 
 def allocate_to_agent(emer):
 
+    global patients_dict
     emer_agents = []
     indexes = []
 
@@ -208,7 +218,9 @@ def allocate_to_agent(emer):
 
     patients = emer.get_num_patients()
     while patients > 0:
-        patients = emer.get_control_tower().allocate_emergency(emer, patients)
+        result = emer.get_control_tower().allocate_emergency(emer, patients, patients_dict)
+        patients = result[0]
+        patients_dict = result[1]
         if patients == emer.get_num_patients():
             print("Retrying...")  # If it happens, should only happen one time
             time.sleep(3)
@@ -237,12 +249,22 @@ def perceive_emergencies():
 
 
 def global_check_and_update():
-    global run
+    global run, patients_dict
     while run:
         for agent in agents:
             for hospital in agent.get_hospitals():
                 for vehicle in hospital.get_medical_vehicles():
                     vehicle.check_vehicle_status()
+        for patient in patients_dict.values():
+            p_time = patient.check_admission_time()
+            if patient.get_p_id() == 1:
+                print("tempo paciente 1: ", p_time)
+            if p_time == 0:
+                print("This is the hospital capacity before: ",patient.get_p_hospital().get_curr_capacity())
+                patient.get_p_hospital().update_curr_capacity(-1)
+                print("This is the hospital capacity after: ", patient.get_p_hospital().get_curr_capacity())
+                del patients_dict[patient.get_p_id()]
+                print(patients_dict[patient.get_p_id()])
         time.sleep(1)    # wait to decrease ambulances rest
 
 
