@@ -1,5 +1,4 @@
 import time
-
 import math
 from threading import Thread
 
@@ -75,7 +74,7 @@ class Agent:
             min_hospital.update_curr_capacity(patient_counter)  # TODO can only update when vehicles arrive to emergency
         else:
             min_hospital.update_curr_capacity(min_hospital.get_slots())
-        print(min_hospital.get_curr_capacity())
+        print(min_hospital.get_curr_capacity()) #debug
 
         return min_hospital, allocated_patients
 
@@ -94,7 +93,7 @@ class Agent:
 
     # Not considering collaboration between agents yet
     # (When all hospitals don't have enough resources, ask help of another agent)
-    def allocate_emergency(self, emergency, patient_counter):
+    def allocate_emergency(self, emergency, patient_counter, patients_dict):
         patients = -1
         final_vehicles = []
         min_distance = math.inf
@@ -115,6 +114,13 @@ class Agent:
                 patients_per_hosp.append(patient_counter)  # quando todos os pacientes ficam no mesmo hospital
             else:
                 patients_per_hosp.append(patient_counter + patients)  # quando apenas ficam alguns dos pacientes naquele hospital
+
+        for i in range(len(patients_per_hosp)):
+            for j in range(patients_per_hosp[i]):
+                for patient in patients_dict.values():
+                    if patient.get_e_id() == emergency.get_eid() and patient.get_p_hospital() is None:
+                        patient.set_p_hospital(min_hospital[i])
+                        break
 
         for hospital in min_hospital:
             possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital))
@@ -159,7 +165,13 @@ class Agent:
                     print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
 
                 self.activate_medical_vehicles(final_vehicles)
+
+                # TODO when collaboration is done, this can't be here
+                for patient in patients_dict.values():
+                    if patient.get_e_id() == emergency.get_eid() and patient.get_p_hospital() == min_hospital[i]:
+                        patient.set_admission_time()
+
         patient_counter -= len(final_vehicles)
         if patient_counter < 0:
             patient_counter = 0
-        return patient_counter
+        return patient_counter, patients_dict
