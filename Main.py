@@ -143,7 +143,7 @@ def create_emergency(e_id):
     for i in range(patients):
         patient_id += 1
         patients_dict[patient_id] = Patient(patient_id, e_id, gravity)
-        print(patients_dict[patient_id].get_p_id(), patients_dict[patient_id].get_e_id(), patients_dict[patient_id].gravity)
+        print(patients_dict[patient_id].get_p_id(), patients_dict[patient_id].get_e_id(), patients_dict[patient_id].gravity) #debug
 
     vehicles = ["VMER"]
     if e_type == "Non life-threatening":
@@ -258,13 +258,13 @@ def global_check_and_update():
         for patient in patients_dict.values():
             p_time = patient.check_admission_time()
             if patient.get_p_id() == 1:
-                print("tempo paciente 1: ", p_time)
+                print("tempo paciente 1: ", p_time) #debug
             if p_time == 0:
-                print("This is the hospital capacity before: ",patient.get_p_hospital().get_curr_capacity())
+                print("This is the hospital capacity before: ",patient.get_p_hospital().get_curr_capacity()) #debug
                 patient.get_p_hospital().update_curr_capacity(-1)
-                print("This is the hospital capacity after: ", patient.get_p_hospital().get_curr_capacity())
+                print("This is the hospital capacity after: ", patient.get_p_hospital().get_curr_capacity()) #debug
                 del patients_dict[patient.get_p_id()]
-                print(patients_dict[patient.get_p_id()])
+                print(patients_dict[patient.get_p_id()]) #debug, is supposed to give error
         time.sleep(1)    # wait to decrease ambulances rest
 
 
