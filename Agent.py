@@ -33,6 +33,7 @@ class Agent:
     def add_emergency(self, emergency):
         self.emergencies.append(emergency)
 
+    # TODO if medicine is not enough, replenish? For when there is only 1 amb. (otherwise it will be an infinite loop)
     def check_enough_medicine(self, vehicle, emergency):
         return vehicle.get_medicine() > vehicle.medicine_needed(emergency.get_gravity(), emergency.get_type())
 

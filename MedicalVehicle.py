@@ -60,7 +60,7 @@ class MedicalVehicle:
         else:
             e_type = random.randint(0, 1)
 
-        return random.randint(e_type * gravity, e_type * gravity + 10) # medicine needed will be, at max, 30
+        return random.randint(e_type * gravity, e_type * gravity + 10)  # medicine needed will be, at max, 30
 
     def decrease_medicine(self, gravity, emer_type):
 
