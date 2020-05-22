@@ -29,6 +29,7 @@ emergency_queue = []
 flag_ot = False
 patients_dict = {}
 patient_id = 0
+agent_id = 0
 
 
 def check_if_comma(string):
@@ -53,7 +54,7 @@ def sanitize_vehicles_input(arg):
 
 
 def setup():
-    global zones, hospital_groups, agents, width, height, cycle_time, zone_ids, zone_id
+    global zones, hospital_groups, agents, width, height, cycle_time, zone_ids, zone_id, agent_id
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
     n_agents = input("Number of Control Towers: ")
@@ -100,7 +101,8 @@ def setup():
         while column >= n_columns:
             row += 1
             column -= n_columns
-        agents += Agent(zones[row][column], zones, hospital_groups[i]),
+        agent_id += 1
+        agents += Agent(agent_id, zones[row][column], zones, hospital_groups[i]),
 
     for i in range(n_agents):
         for hospital in agents[i].get_hospitals():
@@ -130,6 +132,8 @@ def setup():
 
 
 def create_emergency(e_id):
+    if e_id != 1:
+        time.sleep(cycle_time)
     global patients_dict, patient_id
     e_type = random.choice(emergency_types)
 
@@ -161,6 +165,10 @@ def create_emergency(e_id):
     return emergency
 
 
+def untie_agents(agent1, agent2):
+    pass
+
+
 def get_agent_from_hospital(hosp):
     for agent in agents:
         for hospital in agent.hospitals:
@@ -179,12 +187,8 @@ def decide_frontier_agent(a_possibilities, emer):
                     min_distance = dist
                     min_vehicle = vehicle
 
-    if min_vehicle is None:
-        agent = None
-        print("Error: couldn't get any available vehicles")
-    else:
-        agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
-        emer.set_control_tower(agent)
+    agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
+    emer.set_control_tower(agent)
     return agent
 
 
@@ -193,6 +197,7 @@ def allocate_to_agent(emer):
 
     emer_agents = []
     indexes = []
+    first_time = True
 
     for i in range(len(zones)):
         for j in range(len(zones[i])):
@@ -216,10 +221,36 @@ def allocate_to_agent(emer):
           zone_ids[(indexes[emer_agents.index(decision)][0])][(indexes[emer_agents.index(decision)][1])])  # zone_ids[row,column]
 
     patients = emer.get_num_patients()
+    result = None
+    first_time = True
     while patients > 0:
-        result = emer.get_control_tower().allocate_emergency(emer, patients, patients_dict)
-        patients = result[0]
-        patients_dict = result[1]
+        if first_time:
+            result = emer.get_control_tower().allocate_emergency(emer, patients, patients_dict, False, None)
+            patients = result[0]
+            patients_dict = result[1]
+            first_time = False
+        else:  # Cooperative Behaviour
+            help_hospital = result[2]
+            help_vehicle = result[3]
+            if help_hospital:
+                print("pls help is hospital")
+                result = emer.get_control_tower().help_hospital(emer, patients, agents)
+                agent = result[0]
+                # closest_hospital = result[1]
+                patients = result[2]
+                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
+                patients = result[0]
+                patients_dict = result[1]
+            elif help_vehicle:
+                agent = emer.get_control_tower().help_vehicle(emer, agents)
+                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
+                patients = result[0]
+                patients_dict = result[1]
+            if help_hospital and help_vehicle:
+                agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
+                agent2 = emer.get_control_tower().help_vehicle(emer, agents)
+                # TODO desemapar os agentes (chamar funçao untie_agents)
+
         if patients == emer.get_num_patients():
             print("Retrying...")  # If it happens, should only happen one time
             time.sleep(3)
@@ -239,10 +270,10 @@ def perceive_emergencies():
             else:
                 if not flag_ot:
                     emergency = create_emergency(emergency_id)
+                    # emergency = Emergency(1, (100,100), "Life-threatening", 18, 4, ["SBV"])
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
         allocate_to_agent(emergency)
-        time.sleep(cycle_time)
 
 ########################################################################################################################
 
