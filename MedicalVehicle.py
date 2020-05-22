@@ -21,8 +21,8 @@ class MedicalVehicle:
         self.emLocation = None
         self.emHospital = None
         self.work_km = 0
-        self.max_km = 6000  # can move always for 1 min straight
-        self.rest = 30  # stays 30 seconds in rest
+        self.max_km = 6000  # can move always for 1 min straight. "Real" time is 60 hours
+        self.rest = 30  # stays 30 seconds in rest. "Real" rest time is 30 hours
 
     def get_id(self):
         return self.id
@@ -141,7 +141,7 @@ class MedicalVehicle:
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(1/100)    # ambulances move 1 in 1 ms
+            time.sleep(1/100)    # ambulances move 1 km in 10 ms."Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
 
