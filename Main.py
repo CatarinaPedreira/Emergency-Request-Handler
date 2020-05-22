@@ -41,6 +41,13 @@ def sanitize_integer_input(arg):
     return int(arg)
 
 
+def sanitize_vehicles_input(arg):
+    s = "Invalid input. Please insert a positive integer value bigger than 2: "
+    while not arg.isdigit() or int(arg) < 3:
+        arg = input(s)
+    return int(arg)
+
+
 def sanitize_area_input(area):
     area = check_if_comma(area)
     while (not area[0].isnumeric()) or (not area[1].isnumeric()) or area[0] == "0" or area[1] == "0":
@@ -61,8 +68,8 @@ def setup():
     n_agents = sanitize_integer_input(n_agents)
     n_hospitals = input("Number of Hospitals per zone: ")
     n_hospitals = sanitize_integer_input(n_hospitals)
-    n_vehicles = input("Number of Medical Vehicles per hospital: ")
-    n_vehicles = sanitize_integer_input(n_vehicles)
+    n_vehicles = input("Number of Medical Vehicles per hospital (minimum 3): ")
+    n_vehicles = sanitize_vehicles_input(n_vehicles)
     cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
     cycle_time = sanitize_integer_input(cycle_time)
 
@@ -111,6 +118,7 @@ def setup():
     sbv_id = 0
     vmer_id = 0
     siv_id = 0
+
     for i in range(n_agents):
         for hosp in hospital_groups[i]:
             hosp.set_control_tower(agents[i])

@@ -6,8 +6,7 @@ def check_if_comma(string):
 
 def sanitize_location(area, num, val):
     s = "Invalid input. Please insert positive " + str(val) + " value smaller or equal than " + str(num) + ": "
-    num += 1
-    while not area.isdigit() or not -1 < int(area) < num:
+    while not area.isdigit() or not -1 < int(area) < num + 1:
         area = input(s)
     return int(area)
 
