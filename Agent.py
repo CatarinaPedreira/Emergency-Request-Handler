@@ -33,7 +33,6 @@ class Agent:
     def add_emergency(self, emergency):
         self.emergencies.append(emergency)
 
-    # TODO if medicine is not enough, replenish? For when there is only 1 amb. (otherwise it will be an infinite loop)
     def check_enough_medicine(self, vehicle, emergency):
         return vehicle.get_medicine() > vehicle.medicine_needed(emergency.get_gravity(), emergency.get_type())
 
@@ -48,6 +47,10 @@ class Agent:
                         and self.check_enough_medicine(medical_vehicle, emergency)\
                         and self.check_enough_fuel(medical_vehicle, emergency, min_hospital):
                     possible_ambulances.append(medical_vehicle)
+                elif not self.check_enough_medicine(medical_vehicle, emergency):
+                    medical_vehicle.replenish()  # This way, on the next iteration he will always have enough medicine
+                    print(medical_vehicle.type_vehicle, "vehicle", medical_vehicle.id,
+                          "replenished fuel and medicine at the hospital")
 
         return possible_ambulances
 
@@ -56,15 +59,17 @@ class Agent:
         allocated_patients = 0
         for hospital in self.hospitals:
             hospital_dist = self.manhattan_distance(hospital, emergency)
-            if hospital_dist < min_distance and not hospital.is_full():
+            if hospital_dist <= min_distance and not hospital.is_full():
                 min_distance = hospital_dist
                 min_hospital = hospital
                 allocated_patients = hospital.get_slots() - patient_counter
 
+        if min_hospital is None:
+            print("Error: couldn't get any free hospital")  # TODO fix this hospital can't be none
+            return None
+
         if allocated_patients >= 0:
-            if min_hospital is None:
-                pass    # TODO fix this hospital can't be none
-            min_hospital.update_curr_capacity(patient_counter)
+            min_hospital.update_curr_capacity(patient_counter)  # TODO can only update when vehicles arrive to emergency
         else:
             min_hospital.update_curr_capacity(min_hospital.get_slots())
 
@@ -77,7 +82,7 @@ class Agent:
             thread.start()
             threads.append(thread)
 
-        wait_threads(threads)
+        wait_threads(threads)       # Why is this here. This means that we have to wait to allocate the rest of the vehicles
 
     ###################
     # Agent's Decision#
@@ -98,6 +103,8 @@ class Agent:
 
         while patients < 0:
             result = self.check_closest_hospital(emergency, math.inf, patient_counter)
+            if result is None:
+                return
             min_hospital.append(result[0])
             patients = result[1]
             if patients >= 0:
@@ -139,12 +146,15 @@ class Agent:
                     min_distance = math.inf
                     min_vehicle = None
 
-            if len(final_vehicles) == 1:
-                print("1 medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
+            if len(final_vehicles) == 0:
+                print("Error: no medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
             else:
-                print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
+                if len(final_vehicles) == 1:
+                    print("1 medical vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
+                else:
+                    print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
 
-            self.activate_medical_vehicles(final_vehicles)
+                self.activate_medical_vehicles(final_vehicles)
         patient_counter -= len(final_vehicles)
         if patient_counter < 0:
             patient_counter = 0
