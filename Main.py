@@ -25,6 +25,7 @@ zone_ids = [[]]
 zone_id = 0
 run = True
 emergency_queue = []
+flag_ot = False
 
 
 def check_if_comma(string):
@@ -48,22 +49,10 @@ def sanitize_vehicles_input(arg):
     return int(arg)
 
 
-def sanitize_area_input(area):
-    area = check_if_comma(area)
-    while (not area[0].isnumeric()) or (not area[1].isnumeric()) or area[0] == "0" or area[1] == "0":
-        area = check_if_comma(area)
-
-    area[0] = int(area[0])
-    area[1] = int(area[1])
-    return tuple(area)
-
-
 def setup():
     global zones, hospital_groups, agents, width, height, cycle_time, zone_ids, zone_id
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
-    area = input("Area size (as width,height): ")
-    area = sanitize_area_input(area)
     n_agents = input("Number of Control Towers: ")
     n_agents = sanitize_integer_input(n_agents)
     n_hospitals = input("Number of Hospitals per zone: ")
@@ -73,8 +62,8 @@ def setup():
     cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
     cycle_time = sanitize_integer_input(cycle_time)
 
-    width = area[0]
-    height = area[1]
+    width = 1000
+    height = 1000
     n_rows = 0
     n_columns = 0
 
@@ -182,8 +171,12 @@ def decide_frontier_agent(a_possibilities, emer):
                     min_distance = dist
                     min_vehicle = vehicle
 
-    agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
-    emer.set_control_tower(agent)
+    if min_vehicle is None:
+        agent = None
+        print("Error: couldn't get any available vehicles")
+    else:
+        agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
+        emer.set_control_tower(agent)
     return agent
 
 
@@ -204,6 +197,8 @@ def allocate_to_agent(emer):
 
     if len(emer_agents) > 1:
         decision = decide_frontier_agent(emer_agents, emer)
+        if decision is None:
+            return
     else:  # Len will never be 0 given the boundaries we give to the locations of emergencies
         decision = emer_agents[0]
         emer.set_control_tower(decision)
@@ -214,17 +209,25 @@ def allocate_to_agent(emer):
     patients = emer.get_num_patients()
     while patients > 0:
         patients = emer.get_control_tower().allocate_emergency(emer, patients)
+        if patients == emer.get_num_patients():
+            print("Retrying...")  # If it happens, should only happen one time
+            time.sleep(3)
+        if patients is None:
+            return
 
 
 def perceive_emergencies():
     global emergency_id, emergency_queue
     while run:
         emergency_id += 1
-        if len(emergency_queue) != 0:
-            emergency = emergency_queue.pop(0)
-            emergency.set_eid(emergency_id)
-        else:
-            emergency = create_emergency(emergency_id)
+        emergency = None
+        while emergency is None:
+            if len(emergency_queue) != 0:
+                emergency = emergency_queue.pop(0)
+                emergency.set_eid(emergency_id)
+            else:
+                if not flag_ot:
+                    emergency = create_emergency(emergency_id)
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
         allocate_to_agent(emergency)
@@ -297,8 +300,12 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 setup()
+# to open with terminal input use flag -t or -ot (to only receive emergencies from terminal: py Main.py -t
 if len(sys.argv) > 1:
-    if sys.argv[1] == "-t":     # to open with terminal input use flag -t: py Main.py -t
+    if sys.argv[1] == "-t":
+        thread2.start()
+    elif sys.argv[1] == "-ot":
+        flag_ot = True
         thread2.start()
 thread.start()
 perceive_emergencies()

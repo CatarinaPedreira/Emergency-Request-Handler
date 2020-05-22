@@ -1,6 +1,8 @@
 import time
 import random
 
+from math import sqrt
+
 
 def equal_locations(list_location, tuple_location):
     return list_location[0] == tuple_location[0] and list_location[1] == tuple_location[1]
@@ -10,18 +12,18 @@ class MedicalVehicle:
     def __init__(self, ident, type_vehicle, hospital_base):
         self.id = ident
         self.type_vehicle = type_vehicle
-        self.fuel = self.max_fuel = 2000
+        self.fuel = self.max_fuel = 5000
         self.medicine = self.max_medicine = 200
         self.status = "Available"    # (Available, Assigned, Rest, Replenish)
         self.hospital_base = hospital_base
         self.hospital_curr = hospital_base
         self.location = list(hospital_base.get_location())
         self.minMedicine = 30
-        self.minFuel = 200
+        self.minFuel = 1000
         self.emLocation = None
         self.emHospital = None
         self.work_km = 0
-        self.max_km = 6000  # can move always for 1 min straight. "Real" time is 60 hours
+        self.max_km = 20000  # can move always for 200s straight. "Real" time is 60 hours
         self.rest = 30  # stays 30 seconds in rest. "Real" rest time is 30 hours
 
     def get_id(self):
