@@ -219,11 +219,11 @@ def perceive_emergencies():
             emergency = create_emergency(emergency_id)
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
-        time.sleep(cycle_time)
         allocate_to_agent(emergency)
-
+        time.sleep(cycle_time)
 
 ########################################################################################################################
+
 
 def global_check_and_update():
     global run
