@@ -232,7 +232,13 @@ def allocate_to_agent(emer):
         else:  # Cooperative Behaviour
             help_hospital = result[2]
             help_vehicle = result[3]
-            if help_hospital:
+            if help_hospital and help_vehicle:
+                print("both are activated")
+                agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
+                agent2 = emer.get_control_tower().help_vehicle(emer, agents)
+                # TODO desemapar os agentes (chamar funçao untie_agents)
+                break
+            elif help_hospital:
                 print("New zone is going to help")
                 agent = emer.get_control_tower().help_hospital(emer, patients, agents)
                 # agent = result[0] # Agent chosen to help, because it has the hospital that's closest to the emergency
@@ -245,11 +251,6 @@ def allocate_to_agent(emer):
                 result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
                 patients = result[0]
                 patients_dict = result[1]
-            if help_hospital and help_vehicle:
-                print("both are activated")
-                agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
-                agent2 = emer.get_control_tower().help_vehicle(emer, agents)
-                # TODO desemapar os agentes (chamar funçao untie_agents)
 
         if patients == emer.get_num_patients():
             print("Retrying...")  # If it happens, should only happen one time
@@ -291,6 +292,8 @@ def global_check_and_update():
         for patient in patients_dict.values():
             p_time = patient.check_admission_time()
             if p_time == 0:
+                # TODO este if é so para contornar o bug dos explosive slots; nao devia estar a acontecer
+                # if not (patient.get_p_hospital().get_slots() == patient.get_p_hospital().get_max_capacity()):
                 patient.get_p_hospital().update_curr_capacity(-1)
                 patient_del.append(patient)
         for patient in patient_del:
