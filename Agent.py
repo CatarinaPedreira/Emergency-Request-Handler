@@ -105,8 +105,8 @@ class Agent:
         min_hospital = None
         allocated_patients = 0
         for hospital in self.hospitals:
-            print("I am hospital", hospital.get_id(), "and I have", hospital.get_slots(), "free slots right now.")
-            print("Patient counter is: ", patient_counter)
+            # print("I am hospital", hospital.get_id(), "and I have", hospital.get_slots(), "free slots right now.")
+            # print("Patient counter is: ", patient_counter)
             hospital_dist = self.manhattan_distance(hospital, emergency)
             if hospital_dist <= min_distance and not hospital.is_full():
                 min_distance = hospital_dist
@@ -124,10 +124,10 @@ class Agent:
 
         return min_hospital, allocated_patients
 
-    def activate_medical_vehicles(self, final_vehicles):
+    def activate_medical_vehicles(self, final_vehicles, eid):
         threads = []
         for vehicle in final_vehicles:
-            thread = Thread(target=vehicle.move)
+            thread = Thread(target=vehicle.move, args=(eid,))
             thread.start()
             threads.append(thread)
 
@@ -154,16 +154,16 @@ class Agent:
         while patients < 0:
             result = self.check_closest_hospital(emergency, math.inf, patient_counter)
             if result is None:
-                print("All hospitals are full and there are still patients to attend."
-                      " Will contact nearest zone(s) to ask for help")
+                print("All hospitals are full and there are still patients to attend.\n"
+                      "Will contact nearest zone(s) to ask for help")
                 self.failed_alloc_hospital = True
                 break
             min_hospital.append(result[0])
             patients = result[1]
             if patients >= 0:
-                patients_per_hosp.append(patient_counter)  # quando todos os pacientes ficam no mesmo hospital
+                patients_per_hosp.append(patient_counter)  # when all patients stay in the same hospital
             else:
-                patients_per_hosp.append(patient_counter + patients)  # quando apenas ficam alguns dos pacientes naquele hospital
+                patients_per_hosp.append(patient_counter + patients)  # when only some patients stay in the same hospital
 
         for i in range(len(patients_per_hosp)):
             for j in range(patients_per_hosp[i]):
@@ -175,13 +175,13 @@ class Agent:
         for hospital in min_hospital:
             possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital))
 
-        for i in range(len(patients_per_hosp)):  #debug
-            print(patients_per_hosp[i], "patients to hospital", i)
+        # for i in range(len(patients_per_hosp)):  #debug
+        #     print(patients_per_hosp[i], "patients to hospital", i)
 
         for i in range(len(patients_per_hosp)):
             print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
             for j in range(patients_per_hosp[i]):
-                print("Patient number", j)
+                # print("Patient number", j)
                 for h_possibilities in possible_ambulances:
                     for possibility in h_possibilities:
 
@@ -222,7 +222,7 @@ class Agent:
                 elif len(final_vehicles) > 1 and helping_v:
                     print(len(final_vehicles), "vehicles were allocated as backup to help deal with emergency nº", emergency.get_eid(), "from zone", helped_agent.get_id(), "\n")
 
-                self.activate_medical_vehicles(final_vehicles)
+                self.activate_medical_vehicles(final_vehicles, emergency.get_eid())
 
                 # TODO when collaboration is done, this can't be here
                 for patient in patients_dict.values():

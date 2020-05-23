@@ -141,7 +141,7 @@ class MedicalVehicle:
         self.decrease_fuel(1)
         self.update_work_km(1)
 
-    def move(self):
+    def move(self, eid):
         self.change_status("Assigned")
 
         # Move from location to emergency
@@ -149,14 +149,14 @@ class MedicalVehicle:
             self.update_location(self.location, self.emLocation)
             time.sleep(1/100)    # ambulances move 1 km in 10 ms. "Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
 
-        print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
+        print(self.type_vehicle, "vehicle", self.id, "arrived to emergency nº", eid)
 
         # Move from emergency location to emergency's hospital
         while not equal_locations(self.location, self.emHospital.get_location()):
             self.update_location(self.location, self.emHospital.get_location())
             time.sleep(1/100)
 
-        print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
+        print(self.type_vehicle, "vehicle", self.id, "dropped patient at the hospital, in emergency nº", eid)
 
         if self.help_v:
             # Go back to base hospital in its zone
@@ -164,7 +164,7 @@ class MedicalVehicle:
                 self.update_location(self.location, self.hospital_base.get_location())
                 time.sleep(1/100)
 
-            print(self.type_vehicle, "vehicle", self.id, "provided backup for another zone and will now return to its base hospital")
+            print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
 
         # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
         if self.status == 'Replenish':

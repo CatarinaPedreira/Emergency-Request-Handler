@@ -63,8 +63,9 @@ def setup():
     n_hospitals = sanitize_integer_input(n_hospitals)
     n_vehicles = input("Number of Medical Vehicles per hospital (minimum 3): ")
     n_vehicles = sanitize_vehicles_input(n_vehicles)
-    cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
-    cycle_time = sanitize_integer_input(cycle_time)
+    if not (len(sys.argv) > 1 and sys.argv[1] == "-ot"):
+        cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
+        cycle_time = sanitize_integer_input(cycle_time)
 
     width = 1000
     height = 1000
@@ -165,8 +166,31 @@ def create_emergency(e_id):
     return emergency
 
 
-def untie_agents(agent1, agent2):
-    pass
+def min_distance_average(agent, emergency):
+    min_d_hospital = math.inf
+    min_d_vehicle = math.inf
+    for hospital in agent.get_hospitals():
+        if not hospital.is_full():
+            hospital_dist = agent.manhattan_distance(hospital, emergency)
+            if hospital_dist <= min_d_hospital:
+                min_d_hospital = hospital_dist
+        for vehicle in hospital.get_medical_vehicles():
+            dist = agent.manhattan_distance(vehicle, emergency)
+            if dist < min_d_vehicle:
+                min_d_vehicle = dist
+    return (min_d_hospital+min_d_vehicle)/2
+
+
+def untie_agents(agent1, agent2, emergency):
+    if agent1 == agent2:
+        return agent1
+    else:
+        d1 = min_distance_average(agent1, emergency)
+        d2 = min_distance_average(agent2, emergency)
+        if d1 < d2:
+            return agent1
+        else:
+            return agent2
 
 
 def get_agent_from_hospital(hosp):
@@ -233,28 +257,27 @@ def allocate_to_agent(emer):
             help_hospital = result[2]
             help_vehicle = result[3]
             if help_hospital and help_vehicle:
-                print("both are activated")
+                # print("both are activated")
                 agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
                 agent2 = emer.get_control_tower().help_vehicle(emer, agents)
-                # TODO desemapar os agentes (chamar funçao untie_agents)
+                agent = untie_agents(agent1, agent2, emer)
+                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
                 break
             elif help_hospital:
-                print("New zone is going to help")
+                # print("New zone is going to help")
                 agent = emer.get_control_tower().help_hospital(emer, patients, agents)
                 # agent = result[0] # Agent chosen to help, because it has the hospital that's closest to the emergency
                 #  patients = result[1]
                 result = agent.allocate_emergency(emer, patients, patients_dict, False, emer.get_control_tower())
-                patients = result[0]
-                patients_dict = result[1]
             elif help_vehicle:
                 agent = emer.get_control_tower().help_vehicle(emer, agents)  # Agent chosen to help, since it has the vehicle that's closest to the emergency
                 result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
-                patients = result[0]
-                patients_dict = result[1]
+            patients = result[0]
+            patients_dict = result[1]
 
         if patients == emer.get_num_patients():
-            print("Retrying...")  # If it happens, should only happen one time
-            time.sleep(3)
+            print("Retrying in 1 sec...")  # If it happens, should only happen one time
+            time.sleep(1)
         if patients is None:
             return
 
@@ -296,7 +319,7 @@ def global_check_and_update():
                 # if not (patient.get_p_hospital().get_slots() == patient.get_p_hospital().get_max_capacity()):
                 patient.get_p_hospital().update_curr_capacity(-1)
                 patient_del.append(patient)
-        for patient in patient_del:
+        for patient in patient_del: # TODO see this
             del patient
 
         time.sleep(1)    # wait to decrease ambulances rest
