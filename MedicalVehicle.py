@@ -25,6 +25,7 @@ class MedicalVehicle:
         self.work_km = 0
         self.max_km = 20000  # can move always for 200s straight. "Real" time is 60 hours
         self.rest = 30  # stays 30 seconds in rest. "Real" rest time is 30 hours
+        self.help_v = False
 
     def get_id(self):
         return self.id
@@ -109,6 +110,9 @@ class MedicalVehicle:
     def set_em_hospital(self, hospital):
         self.emHospital = hospital
 
+    def set_help_v(self, help_v):
+        self.help_v = help_v
+
     def update_work_km(self, amount):
         self.work_km += amount
 
@@ -143,7 +147,7 @@ class MedicalVehicle:
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(1/100)    # ambulances move 1 km in 10 ms."Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
+            time.sleep(1/100)    # ambulances move 1 km in 10 ms. "Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to the emergency")
 
@@ -154,7 +158,15 @@ class MedicalVehicle:
 
         print(self.type_vehicle, "vehicle", self.id, "safely dropped the patient at the hospital")
 
-    # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
+        if self.help_v:
+            # Go back to base hospital in its zone
+            while not equal_locations(self.location, self.hospital_base.get_location()):
+                self.update_location(self.location, self.hospital_base.get_location())
+                time.sleep(1/100)
+
+            print(self.type_vehicle, "vehicle", self.id, "provided backup for another zone and will now return to its base hospital")
+
+        # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
         if self.status == 'Replenish':
             self.replenish()
             print(self.type_vehicle, "vehicle", self.id, "replenished fuel and medicine at the hospital")

@@ -8,6 +8,7 @@ class Patient:
         self.e_id = e_id  # para saber que pacientes tem que distribuir nos hospitais de acordo com a emergencia
         self.p_hospital = None
         self.gravity = e_gravity
+        self.checked_in = 0
 
         self.admission_time = -1  # começa a negativo porque só começa a contar quando chega ao hospital
 
@@ -26,8 +27,12 @@ class Patient:
     def get_admission_time(self):
         return self.admission_time
 
+    def get_checked_in(self):
+        return self.checked_in
+
     def set_admission_time(self):
         self.admission_time = random.randint(self.gravity, self.gravity + 10)
+        self.checked_in = 1
 
     def check_admission_time(self):
         if self.admission_time > 0:
