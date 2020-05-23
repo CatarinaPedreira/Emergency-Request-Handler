@@ -233,20 +233,20 @@ def allocate_to_agent(emer):
             help_hospital = result[2]
             help_vehicle = result[3]
             if help_hospital:
-                print("pls help is hospital")
-                result = emer.get_control_tower().help_hospital(emer, patients, agents)
-                agent = result[0]
-                # closest_hospital = result[1]
-                patients = result[2]
-                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
+                print("New zone is going to help")
+                agent = emer.get_control_tower().help_hospital(emer, patients, agents)
+                # agent = result[0] # Agent chosen to help, because it has the hospital that's closest to the emergency
+                #  patients = result[1]
+                result = agent.allocate_emergency(emer, patients, patients_dict, False, emer.get_control_tower())
                 patients = result[0]
                 patients_dict = result[1]
             elif help_vehicle:
-                agent = emer.get_control_tower().help_vehicle(emer, agents)
+                agent = emer.get_control_tower().help_vehicle(emer, agents)  # Agent chosen to help, since it has the vehicle that's closest to the emergency
                 result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
                 patients = result[0]
                 patients_dict = result[1]
             if help_hospital and help_vehicle:
+                print("both are activated")
                 agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
                 agent2 = emer.get_control_tower().help_vehicle(emer, agents)
                 # TODO desemapar os agentes (chamar funçao untie_agents)

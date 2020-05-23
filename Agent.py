@@ -42,7 +42,7 @@ class Agent:
 
     def help_hospital(self, emergency, patient_counter, agents):
         min_distance = math.inf
-        min_hospital = None
+        # min_hospital = None
         min_agent = None
         allocated_patients = 0
         for agent in agents:
@@ -52,11 +52,11 @@ class Agent:
                         hospital_dist = self.manhattan_distance(hospital, emergency)
                         if hospital_dist <= min_distance:
                             min_distance = hospital_dist
-                            min_hospital = hospital
+                            # min_hospital = hospital
                             min_agent = agent
-                            allocated_patients = hospital.get_slots() - patient_counter
+                            #allocated_patients = hospital.get_slots() - patient_counter
 
-        return min_agent, min_hospital, allocated_patients
+        return min_agent  # allocated_patients
 
     def get_agent_from_hospital(self, hosp, agents):
         for agent in agents:
@@ -105,6 +105,8 @@ class Agent:
         min_hospital = None
         allocated_patients = 0
         for hospital in self.hospitals:
+            print("I am hospital", hospital.get_id(), "and I have", hospital.get_slots(), "free slots right now.")
+            print("Patient counter is: ", patient_counter)
             hospital_dist = self.manhattan_distance(hospital, emergency)
             if hospital_dist <= min_distance and not hospital.is_full():
                 min_distance = hospital_dist
@@ -112,8 +114,6 @@ class Agent:
                 allocated_patients = hospital.get_slots() - patient_counter
 
         if min_hospital is None:
-            print("Couldn't get any free hospital. Will contact nearest zone(s) to ask for help")
-            self.failed_alloc_hospital = True
             return None
 
         if allocated_patients >= 0:
@@ -130,7 +130,7 @@ class Agent:
             thread.start()
             threads.append(thread)
 
-        wait_threads(threads)       # TODO Why is this here. This means that we have to wait to allocate the rest of the vehicles
+        wait_threads(threads)  # TODO Why is this here. This means that we have to wait to allocate the rest of the vehicles
 
     ###################
     # Agent's Decision#
@@ -138,7 +138,7 @@ class Agent:
 
     # Not considering collaboration between agents yet
     # (When all hospitals don't have enough resources, ask help of another agent)
-    def allocate_emergency(self, emergency, patient_counter, patients_dict, helping, helped_agent):
+    def allocate_emergency(self, emergency, patient_counter, patients_dict, helping_v, helped_agent):
         patients = -1
         final_vehicles = []
         min_distance = math.inf
@@ -146,13 +146,17 @@ class Agent:
         patients_per_hosp = []
         min_hospital = []
         possible_ambulances = []
+        result = None
         # possible_ambulances[0] tem as ambulancias do min_hospital[0] e o
         # patients_per_hosp[0] tem os pacientes que ficaram no min_hospital[0]
 
         while patients < 0:
             result = self.check_closest_hospital(emergency, math.inf, patient_counter)
             if result is None:
-                return patient_counter, patients_dict, self.failed_alloc_hospital, self.failed_alloc_vehicles
+                print("All hospitals are full and there are still patients to attend."
+                      " Will contact nearest zone(s) to ask for help")
+                self.failed_alloc_hospital = True
+                break
             min_hospital.append(result[0])
             patients = result[1]
             if patients >= 0:
@@ -170,10 +174,13 @@ class Agent:
         for hospital in min_hospital:
             possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital))
 
+        for i in range(len(patients_per_hosp)):  #debug
+            print(patients_per_hosp[i], "patients to hospital", i)
+
         for i in range(len(patients_per_hosp)):
-            if patient_counter == emergency.get_num_patients():
-                print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
+            print(patients_per_hosp[i], "patients are going to be taken to Hospital", min_hospital[i].get_id())
             for j in range(patients_per_hosp[i]):
+                print("Patient number", j)
                 for h_possibilities in possible_ambulances:
                     for possibility in h_possibilities:
 
@@ -196,7 +203,7 @@ class Agent:
                         min_vehicle.decrease_medicine(emergency.get_gravity(), emergency.get_type())
                         min_vehicle.set_em_location(emergency.get_location())
                         min_vehicle.set_em_hospital(min_hospital[i])
-                        min_vehicle.set_help_v(helping)
+                        min_vehicle.set_help_v(helping_v)
                         final_vehicles.append(min_vehicle)
 
                     min_distance = math.inf
@@ -205,20 +212,20 @@ class Agent:
             if len(final_vehicles) == 0:
                 print("Error: No vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
             else:
-                if len(final_vehicles) == 1 and not helping:
+                if len(final_vehicles) == 1 and not helping_v:
                     print("1 vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
-                elif len(final_vehicles) > 1 and not helping:
+                elif len(final_vehicles) > 1 and not helping_v:
                     print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
-                elif len(final_vehicles) == 1 and helping:
+                elif len(final_vehicles) == 1 and helping_v:
                     print("1 vehicle was allocated as backup to help deal with emergency nº", emergency.get_eid(),"from zone", helped_agent.get_id(), "\n")
-                elif len(final_vehicles) > 1 and helping:
+                elif len(final_vehicles) > 1 and helping_v:
                     print(len(final_vehicles), "vehicles were allocated as backup to help deal with emergency nº", emergency.get_eid(), "from zone", helped_agent.get_id(), "\n")
 
                 self.activate_medical_vehicles(final_vehicles)
 
                 # TODO when collaboration is done, this can't be here
                 for patient in patients_dict.values():
-                    if patient.get_e_id() == emergency.get_eid() and patient.get_p_hospital() == min_hospital[i]:
+                    if patient.get_e_id() == emergency.get_eid() and patient.get_p_hospital() == min_hospital[i] and not patient.get_checked_in():
                         patient.set_admission_time()
 
         patient_counter -= len(final_vehicles)
@@ -226,5 +233,5 @@ class Agent:
             patient_counter = 0
         elif patient_counter > 0:
             self.failed_alloc_vehicles = True
-            print("Couldn't allocate any vehicle. Will contact nearest zone(s) to ask for help")
+            print("More vehicles are needed for this emergency. Will contact nearest zone(s) to ask for help")
         return patient_counter, patients_dict, self.failed_alloc_hospital, self.failed_alloc_vehicles
