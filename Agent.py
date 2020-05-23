@@ -120,6 +120,7 @@ class Agent:
             min_hospital.update_curr_capacity(patient_counter)  # TODO can only update when vehicles arrive to emergency
         else:
             min_hospital.update_curr_capacity(min_hospital.get_slots())
+            # print("HOSPITALLLLLL ", min_hospital.get_id(), " has ", min_hospital.get_slots(), " free slots")
 
         return min_hospital, allocated_patients
 
