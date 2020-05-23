@@ -63,7 +63,9 @@ def setup():
     n_hospitals = sanitize_integer_input(n_hospitals)
     n_vehicles = input("Number of Medical Vehicles per hospital (minimum 3): ")
     n_vehicles = sanitize_vehicles_input(n_vehicles)
-    if not (len(sys.argv) > 1 and sys.argv[1] == "-ot"):
+    if len(sys.argv) > 1 and sys.argv[1] == "-ot":
+        cycle_time = 0
+    else:
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time)
 
