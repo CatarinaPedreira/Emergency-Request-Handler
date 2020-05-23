@@ -19,36 +19,24 @@ hospital_groups = []
 emergency_types = ("Life-threatening", "Non life-threatening")
 vehicle_types = ("SBV", "VMER", "SIV")
 emergency_id = 0
-width = 0
-height = 0
-cycle_time = 1
+width = 1000
+height = 1000
+cycle_time = 0
 zone_ids = [[]]
 zone_id = 0
 run = True
 emergency_queue = []
+flag_t = False
 flag_ot = False
 patients_dict = {}
 patient_id = 0
 agent_id = 0
 
 
-def check_if_comma(string):
-    while "," not in string:
-        string = input("Invalid input. Please insert two positive integer values (as width,height): ")
-    return string.split(",")
-
-
-# isnumeric () returns True if all characters in the string are numeric characters, so negative numbers are not accepted
-# "" checks if enter was pressed
-def sanitize_integer_input(arg):
-    while not arg.isnumeric() or arg == "0" or arg == "":
-        arg = input("Invalid input. Please insert a positive integer value: ")
-    return int(arg)
-
-
-def sanitize_vehicles_input(arg):
-    s = "Invalid input. Please insert a positive integer value bigger than 2: "
-    while not arg.isdigit() or int(arg) < 3:
+# ---------------------------------------------INITIAL_VALUES_INPUT-----------------------------------------------------
+def sanitize_integer_input(arg, val):
+    s = "Invalid input. Please insert a positive integer (minimum value:" + str(val) + "): "
+    while not arg.isdigit() or int(arg) < val:
         arg = input(s)
     return int(arg)
 
@@ -58,19 +46,15 @@ def setup():
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
     n_agents = input("Number of Control Towers: ")
-    n_agents = sanitize_integer_input(n_agents)
+    n_agents = sanitize_integer_input(n_agents, 1)
     n_hospitals = input("Number of Hospitals per zone: ")
-    n_hospitals = sanitize_integer_input(n_hospitals)
+    n_hospitals = sanitize_integer_input(n_hospitals, 1)
     n_vehicles = input("Number of Medical Vehicles per hospital (minimum 3): ")
-    n_vehicles = sanitize_vehicles_input(n_vehicles)
-    if len(sys.argv) > 1 and sys.argv[1] == "-ot":
-        cycle_time = 0
-    else:
+    n_vehicles = sanitize_integer_input(n_vehicles, 3)
+    if not flag_ot:
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
-        cycle_time = sanitize_integer_input(cycle_time)
+        cycle_time = sanitize_integer_input(cycle_time, 0)
 
-    width = 1000
-    height = 1000
     n_rows = 0
     n_columns = 0
 
@@ -134,6 +118,7 @@ def setup():
             hosp.set_medical_vehicles(medical_vehicles)
 
 
+# ----------------------------------------AUTOMATIC_EMERGENCY_CREATION--------------------------------------------------
 def create_emergency(e_id):
     if e_id != 1:
         time.sleep(cycle_time)
@@ -168,6 +153,7 @@ def create_emergency(e_id):
     return emergency
 
 
+# -----------------------------------------AGENT_ALLOCATION-------------------------------------------------------------
 def min_distance_average(agent, emergency):
     min_d_hospital = math.inf
     min_d_vehicle = math.inf
@@ -296,37 +282,38 @@ def perceive_emergencies():
             else:
                 if not flag_ot:
                     emergency = create_emergency(emergency_id)
-                    # emergency = Emergency(1, (100,100), "Life-threatening", 18, 4, ["SBV"])
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
         allocate_to_agent(emergency)
 
-########################################################################################################################
 
-
+# --------------------------------------------CHECK_UPDATES-------------------------------------------------------------
 def global_check_and_update():
     global run, patients_dict
 
     patient_del = []
     while run:
+        # Decreases rest time of ambulances
         for agent in agents:
             for hospital in agent.get_hospitals():
                 for vehicle in hospital.get_medical_vehicles():
                     vehicle.check_vehicle_status()
 
+        # Remove patient from hospital
         for patient in patients_dict.values():
             p_time = patient.check_admission_time()
-            if p_time == 0:
-                # TODO este if é so para contornar o bug dos explosive slots; nao devia estar a acontecer
-                # if not (patient.get_p_hospital().get_slots() == patient.get_p_hospital().get_max_capacity()):
+            if p_time <= 0:
                 patient.get_p_hospital().update_curr_capacity(-1)
                 patient_del.append(patient)
-        for patient in patient_del: # TODO see this
+        for patient in patient_del:     # TODO see this
             del patient
+        time.sleep(1)    # wait to decrease ambulances rest and patient patient remaining time in hospital
 
-        time.sleep(1)    # wait to decrease ambulances rest
+
+thread_updates = Thread(target=global_check_and_update)
 
 
+# ---------------------------------------RECEIVE_INPUT_FROM_TERMINAL----------------------------------------------------
 def check_new_input():
     global emergency_queue, p
     while run:
@@ -361,33 +348,38 @@ def check_new_input():
             emergency_queue.append(e)
 
 
-thread = Thread(target=global_check_and_update)
-thread2 = Thread(target=check_new_input)
+thread_input = Thread(target=check_new_input)
 
 
+# -----------------------------------------------SIGNAL_HANDLER---------------------------------------------------------
 def signal_handler(signal, frame):
-    global run, thread, p
+    global run, thread_updates, p
     run = False
-    if thread.is_alive():
-        thread.join()
-    if thread2.is_alive():
+    if thread_updates.is_alive():
+        thread_updates.join()
+    if thread_input.is_alive():
         string = "Taskkill /PID " + str(p.pid) + " /F"
         subprocess.check_output(string)
-        thread2.join()
+        thread_input.join()
     print('\nThe simulation has ended')
     sys.exit()
 
 
+# -----------------------------------------------RUNNING_CODE-----------------------------------------------------------
 signal.signal(signal.SIGINT, signal_handler)
 
-setup()
-# to open with terminal input use flag -t or -ot (to only receive emergencies from terminal: py Main.py -t
 if len(sys.argv) > 1:
     if sys.argv[1] == "-t":
-        thread2.start()
+        flag_t = True
     elif sys.argv[1] == "-ot":
         flag_ot = True
-        thread2.start()
-thread.start()
+
+setup()
+# to open with terminal input use flag -t or -ot (to only receive emergencies from terminal): py Main.py -t
+if flag_t:
+    thread_input.start()
+elif flag_ot:
+    thread_input.start()
+thread_updates.start()
 perceive_emergencies()
-thread.join()
+thread_updates.join()
