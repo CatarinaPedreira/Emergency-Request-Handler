@@ -1,4 +1,4 @@
-from Patient import Patient
+import copy
 import os
 import random
 import signal
@@ -6,12 +6,13 @@ import subprocess
 import sys
 import time
 import math
-from threading import Thread
 import numpy
+from threading import Thread
 from Agent import Agent
 from Emergency import Emergency
 from MedicalVehicle import MedicalVehicle
 from Hospital import Hospital
+from Patient import Patient
 
 zones = []
 agents = []
@@ -59,7 +60,6 @@ def setup():
     with open('out.txt', 'a') as file:
         print(n_vehicles, file=file)
 
-    n_rows = 0
     n_columns = 0
 
     # calculate zones in accordance with number of agents (towers)
@@ -93,7 +93,7 @@ def setup():
             row += 1
             column -= n_columns
         agent_id += 1
-        agents += Agent(agent_id, zones[row][column], zones, hospital_groups[i]),
+        agents += Agent(agent_id, zones[row][column], hospital_groups[i]),
 
     for i in range(n_agents):
         for hospital in agents[i].get_hospitals():
@@ -121,21 +121,25 @@ def setup():
                 medical_vehicles += MedicalVehicle(siv_id, "SBV", hosp),
             hosp.set_medical_vehicles(medical_vehicles)
 
+        list_agents = copy.deepcopy(agents)
+        del list_agents[i]
+        agents[i].set_other_agents(list_agents)
+
 
 # ----------------------------------------AUTOMATIC_EMERGENCY_CREATION--------------------------------------------------
 def create_emergency(e_id):
+    global patients_dict, patient_id
+
     if e_id != 1:
         time.sleep(cycle_time)
-    global patients_dict, patient_id
+
     e_type = random.choice(emergency_types)
+    location = (random.randint(0, width), random.randint(0, height))
+    gravity = random.randint(1, 10)
 
     patients = 100     # just a big number
     while patients > 20:
         patients = round(random.lognormvariate(0, 4)) + 1
-
-    location = (random.randint(0, width), random.randint(0, height))
-    gravity = random.randint(1, 10)
-
     for i in range(patients):
         patient_id += 1
         patients_dict[patient_id] = Patient(patient_id, e_id, gravity)
@@ -158,33 +162,6 @@ def create_emergency(e_id):
 
 
 # -----------------------------------------AGENT_ALLOCATION-------------------------------------------------------------
-def min_distance_average(agent, emergency):
-    min_d_hospital = math.inf
-    min_d_vehicle = math.inf
-    for hospital in agent.get_hospitals():
-        if not hospital.is_full():
-            hospital_dist = agent.manhattan_distance(hospital, emergency)
-            if hospital_dist <= min_d_hospital:
-                min_d_hospital = hospital_dist
-        for vehicle in hospital.get_medical_vehicles():
-            dist = agent.manhattan_distance(vehicle, emergency)
-            if dist < min_d_vehicle:
-                min_d_vehicle = dist
-    return (min_d_hospital+min_d_vehicle)/2
-
-
-def untie_agents(agent1, agent2, emergency):
-    if agent1 == agent2:
-        return agent1
-    else:
-        d1 = min_distance_average(agent1, emergency)
-        d2 = min_distance_average(agent2, emergency)
-        if d1 < d2:
-            return agent1
-        else:
-            return agent2
-
-
 def get_agent_from_hospital(hosp):
     for agent in agents:
         for hospital in agent.hospitals:
@@ -204,82 +181,39 @@ def decide_frontier_agent(a_possibilities, emer):
                     min_vehicle = vehicle
 
     agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
-    emer.set_control_tower(agent)
     return agent
 
 
-def allocate_to_agent(emer):
+def allocate_to_agent(emergency):
     global patients_dict
 
-    emer_agents = []
+    emergency_agents = []
     indexes = []
-    first_time = True
 
     for i in range(len(zones)):
         for j in range(len(zones[i])):
-            if zones[i][j][0][0] <= emer.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emer.location[1] <= zones[i][j][1][1]:
+            if zones[i][j][0][0] <= emergency.location[0] <= zones[i][j][2][0] and zones[i][j][0][1] <= emergency.location[1] <= zones[i][j][1][1]:
                 for agent in agents:
                     if agent.get_area() == zones[i][j]:
-                        emer_agents.append(agent)
+                        emergency_agents.append(agent)
                         indexes.append((i, j))
                         break
                 break
 
-    if len(emer_agents) > 1:
-        decision = decide_frontier_agent(emer_agents, emer)
-        if decision is None:
-            return
+    if len(emergency_agents) > 1:
+        agent = decide_frontier_agent(emergency_agents, emergency)
     else:  # Len will never be 0 given the boundaries we give to the locations of emergencies
-        decision = emer_agents[0]
-        emer.set_control_tower(decision)
+        agent = emergency_agents[0]
+    emergency.set_control_tower(agent)
 
     print("Emergency nº", emergency_id, "allocated to control tower from zone",
-          zone_ids[(indexes[emer_agents.index(decision)][0])][(indexes[emer_agents.index(decision)][1])])  # zone_ids[row,column]
+          zone_ids[(indexes[emergency_agents.index(agent)][0])][(indexes[emergency_agents.index(agent)][1])])  # zone_ids[row,column]
 
-    patients = emer.get_num_patients()
-    result = None
-    first_time = True
-    while patients > 0:
-        if first_time:
-            result = emer.get_control_tower().allocate_emergency(emer, patients, patients_dict, False, None)
-            patients = result[0]
-            patients_dict = result[1]
-            first_time = False
-        else:  # Cooperative Behaviour
-            help_hospital = result[2]
-            help_vehicle = result[3]
-            if help_hospital and help_vehicle:
-                # print("both are activated")
-                agent1 = emer.get_control_tower().help_hospital(emer, patients, agents)
-                agent2 = emer.get_control_tower().help_vehicle(emer, agents)
-                agent = untie_agents(agent1, agent2, emer)
-                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
-                break
-            elif help_hospital:
-                # print("New zone is going to help")
-                agent = emer.get_control_tower().help_hospital(emer, patients, agents)
-                # agent = result[0] # Agent chosen to help, because it has the hospital that's closest to the emergency
-                #  patients = result[1]
-                result = agent.allocate_emergency(emer, patients, patients_dict, False, emer.get_control_tower())
-            elif help_vehicle:
-                agent = emer.get_control_tower().help_vehicle(emer, agents)  # Agent chosen to help, since it has the vehicle that's closest to the emergency
-                if agent is None:  # Treats edge case where there is only one zone
-                    agent = emer.get_control_tower()
-                    result = agent.allocate_emergency(emer, patients, patients_dict, False, agent)
-                else:
-                    result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
-            patients = result[0]
-            patients_dict = result[1]
-
-        if patients == emer.get_num_patients():
-            print("Retrying in 1 sec...")  # If it happens, should only happen one time
-            time.sleep(1)
-        if patients is None:
-            return
+    agent.allocate_emergency(emergency, emergency.get_num_patients(), patients_dict, False, None)
 
 
 def perceive_emergencies():
-    global emergency_id, emergency_queue
+    global emergency_id, emergency_queue, patients_dict, patient_id
     while run:
         emergency_id += 1
         emergency = None
@@ -287,6 +221,9 @@ def perceive_emergencies():
             if len(emergency_queue) != 0:
                 emergency = emergency_queue.pop(0)
                 emergency.set_eid(emergency_id)
+                for i in range(emergency.get_num_patients()):
+                    patient_id += 1
+                    patients_dict[patient_id] = Patient(patient_id, emergency.get_eid(), emergency.get_gravity())
             else:
                 if not flag_ot:
                     emergency = create_emergency(emergency_id)
@@ -308,13 +245,14 @@ def global_check_and_update():
                     vehicle.check_vehicle_status()
 
         # Remove patient from hospital
-        for patient in patients_dict.values():
-            p_time = patient.check_admission_time()
-            if p_time <= 0:
-                patient.get_p_hospital().update_curr_capacity(-1)
-                patient_del.append(patient)
-        for patient in patient_del:     # TODO see this
-            del patient
+        for key in patients_dict:
+            p_time = patients_dict[key].check_admission_time()
+            if p_time == 0:
+                patients_dict[key].get_p_hospital().update_curr_capacity(-1)
+                patient_del.append(key)
+        for pat in patient_del:
+            del patients_dict[pat]
+        patient_del = []
         # 0.36s <=> 1 hour in real-life time
         time.sleep(0.36)  # wait to decrease ambulances rest and patient's remaining time in hospital.
 

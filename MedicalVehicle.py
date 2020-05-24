@@ -1,8 +1,6 @@
 import time
 import random
 
-from math import sqrt
-
 
 def equal_locations(list_location, tuple_location):
     return list_location[0] == tuple_location[0] and list_location[1] == tuple_location[1]
@@ -16,7 +14,6 @@ class MedicalVehicle:
         self.medicine = self.max_medicine = 200
         self.status = "Available"    # (Available, Assigned, Rest, Replenish)
         self.hospital_base = hospital_base
-        self.hospital_curr = hospital_base
         self.location = list(hospital_base.get_location())
         self.minMedicine = 30
         self.minFuel = 1000
@@ -42,9 +39,6 @@ class MedicalVehicle:
     def get_hospital_base(self):
         return self.hospital_base
 
-    def get_current_hospital(self):
-        return self.hospital_curr
-
     def get_min_medicine(self):
         return self.minMedicine
 
@@ -56,44 +50,11 @@ class MedicalVehicle:
         if self.fuel <= self.minFuel:
             self.change_status("Replenish")
 
-    def medicine_needed(self, gravity, emer_type):
-        # gravity varies on a scale of 1 to 10; type can be LT or non-LT
-        if emer_type == "Life-threatening":
-            e_type = 2
-        else:
-            e_type = random.randint(0, 1)
-
-        return random.randint(e_type * gravity, e_type * gravity + 10)  # medicine needed will be, at max, 30
-
-    def decrease_medicine(self, gravity, emer_type):
-
-        amount = self.medicine_needed(gravity, emer_type)
-        self.medicine = self.medicine - amount
-        if self.medicine <= self.minMedicine:
-            self.change_status("Replenish")
-
-    # In case the vehicle changes zone and is now controlled by another hospital
-    def change_hospital(self, current):
-        self.hospital_curr = current
-
     def get_status(self):
         return self.status
 
     def change_status(self, status):
         self.status = status
-
-    def check_vehicle_status(self):
-        if self.status == 'Available' and self.location == self.emHospital and self.work_km > 0:
-            self.work_km -= 10
-            if self.work_km < 0:
-                self.work_km = 0
-        elif self.status == 'Rest':
-            if self.rest > 0:
-                self.rest -= 1
-            else:
-                self.status = 'Available'
-                self.rest = 30
-                self.work_km = 0
 
     def get_location(self):
         return self.location
@@ -125,7 +86,36 @@ class MedicalVehicle:
     def get_rest(self):
         return self.rest
 
-    #  Step/Cycle
+    def check_vehicle_status(self):
+        if self.status == 'Available' and self.location == self.emHospital and self.work_km > 0:
+            self.work_km -= 10
+            if self.work_km < 0:
+                self.work_km = 0
+        elif self.status == 'Rest':
+            if self.rest > 0:
+                self.rest -= 1
+            else:
+                self.status = 'Available'
+                self.rest = 30
+                self.work_km = 0
+
+    def medicine_needed(self, gravity, emer_type):
+        # gravity varies on a scale of 1 to 10; type can be LT or non-LT
+        if emer_type == "Life-threatening":
+            e_type = 2
+        else:
+            e_type = random.randint(0, 1)
+
+        return random.randint(e_type * gravity, e_type * gravity + 10)  # medicine needed will be, at max, 30
+
+    def decrease_medicine(self, gravity, emer_type):
+
+        amount = self.medicine_needed(gravity, emer_type)
+        self.medicine = self.medicine - amount
+        if self.medicine <= self.minMedicine:
+            self.change_status("Replenish")
+
+    #  Advances one coordinate
     def update_location(self, start, dest):
         if start[0] < dest[0]:
             start[0] += 1
@@ -141,17 +131,19 @@ class MedicalVehicle:
         self.decrease_fuel(1)
         self.update_work_km(1)
 
-    def move(self, eid):
-        self.change_status("Assigned")
+    def move(self, emergency):
+        eid = emergency.get_eid()
 
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
             time.sleep(0.0036)
             # Vehicles move 1 km in 0.0036 seconds <=> 36 seconds of real-life time.
-            # Real-life constant speed is 100km/h (given that 0.36 seconds <=> 1 hour of real-life time)
+            # Real-life constant speed is 100 km/h (given that 0.36 seconds <=> 1 hour of real-life time)
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to emergency nº", eid)
+
+        self.decrease_medicine(emergency.get_gravity(), emergency.get_type())
 
         # Move from emergency location to emergency's hospital
         while not equal_locations(self.location, self.emHospital.get_location()):
@@ -161,7 +153,7 @@ class MedicalVehicle:
         print(self.type_vehicle, "vehicle", self.id, "dropped patient at the hospital, in emergency nº", eid)
 
         if self.help_v:
-            # Go back to base hospital in its zone
+            # If it is a backup vehicle, it goes back to base hospital in its zone
             while not equal_locations(self.location, self.hospital_base.get_location()):
                 self.update_location(self.location, self.hospital_base.get_location())
                 time.sleep(0.0036)
