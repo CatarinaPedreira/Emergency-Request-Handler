@@ -69,6 +69,10 @@ def setup():
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time)
 
+    # TODO beware of file name !!! same in Agent.py
+    with open('out.txt', 'a') as file:
+        print(n_vehicles, file=file)
+
     width = 1000
     height = 1000
     n_rows = 0

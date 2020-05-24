@@ -218,8 +218,11 @@ class Agent:
                 elif len(final_vehicles) > 1 and not helping_v:
                     print(len(final_vehicles), "medical vehicles were allocated to deal with emergency nº", emergency.get_eid(), "\n")
                 elif len(final_vehicles) == 1 and helping_v:
-                    print("1 vehicle was allocated as backup to help deal with emergency nº", emergency.get_eid(),"from zone", helped_agent.get_id(), "\n")
+                    with open('out.txt', 'a') as f:
+                        print('+ 1', file=f)
                 elif len(final_vehicles) > 1 and helping_v:
+                    with open('out.txt', 'a') as f:
+                        print('+', len(final_vehicles), file=f)
                     print(len(final_vehicles), "vehicles were allocated as backup to help deal with emergency nº", emergency.get_eid(), "from zone", helped_agent.get_id(), "\n")
 
                 self.activate_medical_vehicles(final_vehicles, emergency.get_eid())

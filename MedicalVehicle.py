@@ -147,14 +147,14 @@ class MedicalVehicle:
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(1/100)    # ambulances move 1 km in 10 ms. "Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
+            time.sleep(0.0036)    # ambulances move 1 km in 10 ms. "Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to emergency nº", eid)
 
         # Move from emergency location to emergency's hospital
         while not equal_locations(self.location, self.emHospital.get_location()):
             self.update_location(self.location, self.emHospital.get_location())
-            time.sleep(1/100)
+            time.sleep(0.0036)
 
         print(self.type_vehicle, "vehicle", self.id, "dropped patient at the hospital, in emergency nº", eid)
 
@@ -162,7 +162,7 @@ class MedicalVehicle:
             # Go back to base hospital in its zone
             while not equal_locations(self.location, self.hospital_base.get_location()):
                 self.update_location(self.location, self.hospital_base.get_location())
-                time.sleep(1/100)
+                time.sleep(0.0036)
 
             print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
 
