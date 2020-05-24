@@ -263,7 +263,11 @@ def allocate_to_agent(emer):
                 result = agent.allocate_emergency(emer, patients, patients_dict, False, emer.get_control_tower())
             elif help_vehicle:
                 agent = emer.get_control_tower().help_vehicle(emer, agents)  # Agent chosen to help, since it has the vehicle that's closest to the emergency
-                result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
+                if agent is None:  # Treats edge case where there is only one zone
+                    agent = emer.get_control_tower()
+                    result = agent.allocate_emergency(emer, patients, patients_dict, False, agent)
+                else:
+                    result = agent.allocate_emergency(emer, patients, patients_dict, True, emer.get_control_tower())
             patients = result[0]
             patients_dict = result[1]
 

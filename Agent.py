@@ -76,8 +76,11 @@ class Agent:
                             min_distance = dist
                             min_vehicle = vehicle
 
-        agent = self.get_agent_from_hospital(min_vehicle.get_current_hospital(), agents)
-        return agent
+        if min_vehicle is not None:
+            agent = self.get_agent_from_hospital(min_vehicle.get_current_hospital(), agents)
+            return agent
+        else:
+            return None
 
     def check_enough_medicine(self, vehicle, emergency):
         return vehicle.get_medicine() > vehicle.medicine_needed(emergency.get_gravity(), emergency.get_type())
@@ -238,5 +241,5 @@ class Agent:
             patient_counter = 0
         elif patient_counter > 0:
             self.failed_alloc_vehicles = True
-            print("More vehicles are needed for this emergency. Will contact nearest zone(s) to ask for help")
+            print("More vehicles are needed. Will check if there are other zones and, if so, ask for help")  # To also cover the edge case of 1 zone
         return patient_counter, patients_dict, self.failed_alloc_hospital, self.failed_alloc_vehicles
