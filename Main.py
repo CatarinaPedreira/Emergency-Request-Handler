@@ -213,7 +213,7 @@ def allocate_to_agent(emergency):
 
 
 def perceive_emergencies():
-    global emergency_id, emergency_queue
+    global emergency_id, emergency_queue, patients_dict, patient_id
     while run:
         emergency_id += 1
         emergency = None
@@ -221,6 +221,9 @@ def perceive_emergencies():
             if len(emergency_queue) != 0:
                 emergency = emergency_queue.pop(0)
                 emergency.set_eid(emergency_id)
+                for i in range(emergency.get_num_patients()):
+                    patient_id += 1
+                    patients_dict[patient_id] = Patient(patient_id, emergency.get_eid(), emergency.get_gravity())
             else:
                 if not flag_ot:
                     emergency = create_emergency(emergency_id)
@@ -242,13 +245,13 @@ def global_check_and_update():
                     vehicle.check_vehicle_status()
 
         # Remove patient from hospital
-        for key in patients_dict:      # TODO fix bug in dict that don't add patients from terminal
+        for key in patients_dict:
             p_time = patients_dict[key].check_admission_time()
             if p_time == 0:
                 patients_dict[key].get_p_hospital().update_curr_capacity(-1)
                 patient_del.append(key)
-        for p in patient_del:     # TODO see this
-            del patients_dict[p]
+        for pat in patient_del:
+            del patients_dict[pat]
         patient_del = []
         # 0.36s <=> 1 hour in real-life time
         time.sleep(0.36)  # wait to decrease ambulances rest and patient's remaining time in hospital.
