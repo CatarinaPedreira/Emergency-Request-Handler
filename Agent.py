@@ -1,5 +1,3 @@
-import copy
-import time
 import math
 from threading import Thread
 
@@ -180,7 +178,9 @@ class Agent:
                                                   "Will contact nearest zone(s) to ask for help")
                 agent_help_hospital = self.help_hospital(emergency, self.other_agents)
                 if agent_help_hospital is None:
-                    print("Agent", self.agent_id, "-Error: All hospitals are full, emergency failed!")
+                    print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")
+                    for hospital in min_hospital:
+                        hospital.revert_capacity()
                     return
                 else:
                     result = agent_help_hospital.check_closest_hospital(emergency, patients_left)
@@ -211,6 +211,8 @@ class Agent:
                 agent_help_vehicle = self.help_vehicle(emergency, self.other_agents)
                 if agent_help_vehicle is None:
                     print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
+                    for hospital in min_hospital:
+                        hospital.revert_capacity()
                     return
                 else:
                     for hospital in min_hospital:

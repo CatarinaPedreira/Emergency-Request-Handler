@@ -5,7 +5,7 @@ class Hospital:
         self.location = ()
         self.controlTower = None
         self.maxCapacity = 2   # TODO change to 100 later
-        self.currCapacity = 0
+        self.currCapacity = self.oldCapacity = 0
         self.medicalVehicles = []
 
     def get_id(self):
@@ -36,6 +36,13 @@ class Hospital:
         self.medicalVehicles = medical_vehicles
 
     def update_curr_capacity(self, amount):
+        self.oldCapacity = self.currCapacity
+        self.currCapacity += amount
+
+    def revert_capacity(self):
+        self.currCapacity = self.oldCapacity
+
+    def update_capacity(self, amount):
         self.currCapacity += amount
 
     def is_full(self):
