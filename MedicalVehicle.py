@@ -24,7 +24,7 @@ class MedicalVehicle:
         self.emHospital = None
         self.work_km = 0
         self.max_km = 20000  # can move for 72s straight. "Real" time is 200 hours
-        self.rest = 30  # stays 30 seconds in rest. "Real" rest time is ~11 hours
+        self.rest = 4  # stays ~11 seconds in rest. "Real" rest time is ~11 hours
         self.help_v = False
 
     def get_id(self):
