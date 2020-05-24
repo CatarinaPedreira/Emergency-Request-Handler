@@ -252,32 +252,3 @@ class Agent:
         self.activate_medical_vehicles(final_vehicles, emergency)
 
         return patient_counter, patients_dict
-
-    def min_distance_average(self, agent, emergency):
-        min_d_hospital = math.inf
-        min_d_vehicle = math.inf
-        for hospital in agent.get_hospitals():
-            if not hospital.is_full():
-                hospital_dist = agent.manhattan_distance(hospital, emergency)
-                if hospital_dist <= min_d_hospital:
-                    min_d_hospital = hospital_dist
-            for vehicle in hospital.get_medical_vehicles():
-                dist = agent.manhattan_distance(vehicle, emergency)
-                if dist < min_d_vehicle:
-                    min_d_vehicle = dist
-        return (min_d_hospital + min_d_vehicle) / 2
-
-    def untie_agents(self, agent1, agent2, emergency):
-        if agent1 == agent2:
-            return agent1
-        else:
-            d1 = self.min_distance_average(agent1, emergency)
-            d2 = self.min_distance_average(agent2, emergency)
-            if d1 < d2:
-                return agent1
-            else:
-                return agent2
-
-    def process_emergency(self, emergency, patients_dict):
-        patients = emergency.get_num_patients()
-        self.allocate_emergency(emergency, patients, patients_dict, False, None)

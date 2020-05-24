@@ -209,7 +209,7 @@ def allocate_to_agent(emergency):
     print("Emergency nº", emergency_id, "allocated to control tower from zone",
           zone_ids[(indexes[emergency_agents.index(agent)][0])][(indexes[emergency_agents.index(agent)][1])])  # zone_ids[row,column]
 
-    agent.process_emergency(emergency, patients_dict)
+    agent.allocate_emergency(emergency, emergency.get_num_patients(), patients_dict, False, None)
 
 
 def perceive_emergencies():
