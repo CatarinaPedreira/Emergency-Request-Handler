@@ -23,8 +23,8 @@ class MedicalVehicle:
         self.emLocation = None
         self.emHospital = None
         self.work_km = 0
-        self.max_km = 20000  # can move always for 200s straight. "Real" time is 60 hours
-        self.rest = 30  # stays 30 seconds in rest. "Real" rest time is 30 hours
+        self.max_km = 20000  # can move for 72s straight. "Real" time is 200 hours
+        self.rest = 30  # stays 30 seconds in rest. "Real" rest time is ~11 hours
         self.help_v = False
 
     def get_id(self):
@@ -147,7 +147,9 @@ class MedicalVehicle:
         # Move from location to emergency
         while not equal_locations(self.location, self.emLocation):
             self.update_location(self.location, self.emLocation)
-            time.sleep(0.0036)    # ambulances move 1 km in 10 ms. "Real" constant speed is 100km/h, considering that 1 second <=> 1 hour in our system
+            time.sleep(0.0036)
+            # Vehicles move 1 km in 0.0036 seconds <=> 36 seconds of real-life time.
+            # Real-life constant speed is 100km/h (given that 0.36 seconds <=> 1 hour of real-life time)
 
         print(self.type_vehicle, "vehicle", self.id, "arrived to emergency nº", eid)
 
@@ -166,7 +168,6 @@ class MedicalVehicle:
 
             print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
 
-        # TODO se move deixar de ser atomico, atualizacao de estado tem que passar para depois da chamada do move
         if self.status == 'Replenish':
             self.replenish()
             print(self.type_vehicle, "vehicle", self.id, "replenished fuel and medicine at the hospital")

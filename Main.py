@@ -315,7 +315,8 @@ def global_check_and_update():
                 patient_del.append(patient)
         for patient in patient_del:     # TODO see this
             del patient
-        time.sleep(1)    # wait to decrease ambulances rest and patient patient remaining time in hospital
+        # 0.36s <=> 1 hour in real-life time
+        time.sleep(0.36)  # wait to decrease ambulances rest and patient's remaining time in hospital.
 
 
 thread_updates = Thread(target=global_check_and_update)
