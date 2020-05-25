@@ -7,9 +7,9 @@ x_list = []
 y_list = []
 index_counter = 0
 
-for i in range(3, 12, 2):  # for loop parameters may differ according to what we are testing
+for i in range(3, 12, 4):  # for loop parameters may differ according to what we are testing
 	y_list += [],
-	for j in range(11):  # 11 is the number of runs
+	for j in range(5):  # 5 is the number of runs
 		counter = 0
 		f = open('out' + str(i) + '_' + str(j) + '.txt', 'r')
 		for line in f.readlines():
