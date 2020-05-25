@@ -5,12 +5,12 @@ class Patient:
 
     def __init__(self, p_id, e_id, e_gravity):
         self.p_id = p_id
-        self.e_id = e_id  # para saber que pacientes tem que distribuir nos hospitais de acordo com a emergencia
+        self.e_id = e_id  # To know which patients have to be distributed in the hospitals according to the emergency
         self.p_hospital = None
         self.gravity = e_gravity
         self.checked_in = 0
 
-        self.admission_time = -1  # começa a negativo porque só começa a contar quando chega ao hospital
+        self.admission_time = -1  # Starts negative because it only starts counting once it reaches the hospital
 
     def get_p_id(self):
         return self.p_id

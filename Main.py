@@ -59,9 +59,6 @@ def setup():
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time, 0)
 
-    with open('plots/hospitals/out1_2.txt', 'a') as file:
-        print(n_vehicles, file=file)
-
     n_columns = 0
 
     # calculate zones in accordance with number of agents (towers)
@@ -155,7 +152,7 @@ def create_emergency(e_id):
             n = numpy.random.choice([1, 2], 1, p=[0.9, 0.1])
         else:
             n = numpy.random.choice([1, 2, 3], 1, p=[0.85, 0.10, 0.05])
-        while "VMER" in vehicles and ("SBV" not in vehicles and "SIV" not in vehicles):     # because VMER can't be allocated alone
+        while "VMER" in vehicles and ("SBV" not in vehicles and "SIV" not in vehicles): # because VMER can't be allocated alone
             vehicles = numpy.random.choice(vehicle_types, n, replace=False, p=[0.7, 0.20, 0.10])
 
     emergency = Emergency(e_id, location, e_type, patients, gravity, vehicles)
@@ -181,7 +178,7 @@ def decide_frontier_agent(a_possibilities, emer):
                     min_distance = dist
                     min_vehicle = vehicle
 
-    agent = get_agent_from_hospital(min_vehicle.get_hospital_base())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
+    agent = get_agent_from_hospital(min_vehicle.get_hospital_base())  # Curr hospital because with collaboration this vehicle may not be within its initial zone
     return agent
 
 
@@ -248,10 +245,6 @@ def perceive_emergencies():
             print("There aren't enough vehicles in entire the map! The emergency will not be responded.")
         if time.time() > start + PERIOD_OF_TIME:
             print("Finished")
-            # with open('plots/agents/out8_2.txt', 'a') as file:
-            #     print(len(agents), file=file)
-            # with open('plots/agents/out8_2.txt', 'a') as file:
-            #     print(emergency_id, file=file)
             break
 
 # --------------------------------------------CHECK_UPDATES-------------------------------------------------------------

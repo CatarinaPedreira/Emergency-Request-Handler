@@ -15,7 +15,7 @@ class Agent:
         self.area = area_border
         self.hospitals = hospitals
         self.other_agents = None
-        self.collaboration = True
+        self.collaboration = False
 
     def manhattan_distance(self, a, b):
         return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
@@ -162,6 +162,8 @@ class Agent:
                 agent.calculate_possibilities(available_ambulances, emergency, final_vehicles, min_hospital, True, hosp_vehicles)
             else:
                 return -1
+        elif not self.collaboration:
+            return -1
 
 # ---------------------------------------REACTIVITY-DELIBERATION-AND-COLLABORATION--------------------------------------
     def allocate_emergency(self, emergency, patient_counter, patients_dict, help_flag, helped_agent):
@@ -180,8 +182,7 @@ class Agent:
                         first = False
                         print("Agent", self.agent_id, "-All zone hospitals are incapable of allocating all patients to attend.\n"
                                                       "Will contact nearest zone(s) to ask for help")
-                        with open('plots/hospitals/out1_2.txt', 'a') as f:
-                          print('+ 1', file=f)
+
                     agent_help_hospital = self.help_hospital(emergency, self.other_agents)
                     if agent_help_hospital is None:
                         print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")
@@ -276,5 +277,4 @@ class Agent:
             print(len(final_vehicles), "vehicles were allocated as backup to help deal with emergency nº", emergency.get_eid(), "from zone", helped_agent, "\n")
 
         self.activate_medical_vehicles(final_vehicles, emergency)
-
         return patient_counter, patients_dict
