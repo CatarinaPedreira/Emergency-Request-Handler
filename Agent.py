@@ -164,6 +164,8 @@ class Agent:
                         first = False
                         print("Agent", self.agent_id, "-All zone hospitals are incapable of allocating all patients to attend.\n"
                                                       "Will contact nearest zone(s) to ask for help")
+                        with open('plots/out11_0.txt', 'a') as f:
+                            print('+ 1', file=f)
                     agent_help_hospital = self.help_hospital(emergency, self.other_agents)
                     if agent_help_hospital is None:
                         print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")
