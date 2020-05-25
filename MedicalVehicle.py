@@ -23,6 +23,7 @@ class MedicalVehicle:
         self.max_km = 20000  # can move for 72s straight. "Real" time is 200 hours
         self.rest = 4  # stays ~11 seconds in rest. "Real" rest time is ~11 hours
         self.help_v = False
+        self.temp_help = False
 
     def get_id(self):
         return self.id
@@ -73,6 +74,12 @@ class MedicalVehicle:
 
     def set_help_v(self, help_v):
         self.help_v = help_v
+
+    def set_temp_help(self, f):
+        self.temp_help = f
+
+    def get_temp_help(self):
+        return self.temp_help
 
     def update_work_km(self, amount):
         self.work_km += amount
@@ -131,7 +138,7 @@ class MedicalVehicle:
         self.decrease_fuel(1)
         self.update_work_km(1)
 
-    def move(self, emergency):
+    def move(self, emergency, collab):
         eid = emergency.get_eid()
 
         # Move from location to emergency
@@ -152,14 +159,14 @@ class MedicalVehicle:
 
         print(self.type_vehicle, "vehicle", self.id, "dropped patient at the hospital, in emergency nº", eid)
 
-        if self.help_v:
+        if self.help_v and collab:
             # If it is a backup vehicle, it goes back to base hospital in its zone
             while not equal_locations(self.location, self.hospital_base.get_location()):
                 self.update_location(self.location, self.hospital_base.get_location())
                 time.sleep(0.0036)
 
             print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
-            with open('plots/out7_0.txt', 'a') as f:
+            with open('plots/out11_0.txt', 'a') as f:
                 print('+ 1', file=f)
 
         if self.status == 'Replenish':

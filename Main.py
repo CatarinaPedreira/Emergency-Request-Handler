@@ -59,7 +59,7 @@ def setup():
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time, 0)
 
-    with open('plots/out7_0.txt', 'a') as file:
+    with open('plots/out11_0.txt', 'a') as file:
         print(n_vehicles, file=file)
 
     n_columns = 0

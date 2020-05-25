@@ -1,3 +1,4 @@
+import copy
 import math
 from threading import Thread
 
@@ -14,7 +15,7 @@ class Agent:
         self.area = area_border
         self.hospitals = hospitals
         self.other_agents = None
-        self.collaboration = False
+        self.collaboration = True
 
     def manhattan_distance(self, a, b):
         return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
@@ -74,13 +75,14 @@ class Agent:
     def check_enough_fuel(self, vehicle, emergency, hospital):
         return vehicle.get_fuel() > (self.manhattan_distance(vehicle, emergency) + self.manhattan_distance(emergency, hospital))
 
-    def filter_medical_vehicles(self, emergency, min_hospital, possible_ambulances):
+    def filter_medical_vehicles(self, emergency, min_hospital, possible_ambulances, collab):
         for hospital in self.hospitals:
             for medical_vehicle in hospital.medicalVehicles:
                 if medical_vehicle.get_status() == "Available"\
                         and self.check_enough_medicine(medical_vehicle, emergency)\
                         and self.check_enough_fuel(medical_vehicle, emergency, min_hospital):
                     possible_ambulances.append(medical_vehicle)
+                    medical_vehicle.set_temp_help(collab)
                 elif (not self.check_enough_medicine(medical_vehicle, emergency)) or (not self.check_enough_fuel(medical_vehicle, emergency, min_hospital)):
                     medical_vehicle.change_status("Replenish")
                     medical_vehicle.replenish()  # This way, on the next iteration he will always have enough medicine
@@ -113,7 +115,7 @@ class Agent:
     def activate_medical_vehicles(self, final_vehicles, emergency):
         threads = []
         for vehicle in final_vehicles:
-            thread = Thread(target=vehicle.move, args=(emergency,))
+            thread = Thread(target=vehicle.move, args=(emergency,self.collaboration,))
             thread.start()
             threads.append(thread)
 
@@ -135,17 +137,22 @@ class Agent:
             min_vehicle.change_status("Assigned")
             min_vehicle.set_em_location(emergency.get_location())
             min_vehicle.set_em_hospital(min_hospital)
-            min_vehicle.set_help_v(help_flag)
+            if not help_flag:
+                min_vehicle.set_help_v(min_vehicle.get_temp_help())
+            else:
+                min_vehicle.set_help_v(help_flag)
             final_vehicles.append(min_vehicle)
             hosp_vehicles.append(min_vehicle)
         elif self.collaboration:
             agent = self.help_vehicle(emergency, self.other_agents)
-            if agent is None:
-                print("Agent:", self.agent_id, "-All vehicles are unavailable or insufficient, emergency not completed!BU")
+            if agent is not None:
+                # print("Agent:", self.agent_id, "-All vehicles are unavailable or insufficient, emergency not completed!BU")
+                # return -1
+                possible_ambulances = []
+                agent.filter_medical_vehicles(emergency, min_hospital, possible_ambulances, True)
+                agent.calculate_possibilities(possible_ambulances, emergency, final_vehicles, min_hospital, True, hosp_vehicles)
+            else:
                 return -1
-            possible_ambulances = []
-            agent.filter_medical_vehicles(emergency, min_hospital, possible_ambulances)
-            agent.calculate_possibilities(possible_ambulances, emergency, final_vehicles, min_hospital, True, hosp_vehicles)
 
 # ---------------------------------------REACTIVITY-DELIBERATION-AND-COLLABORATION--------------------------------------
     def allocate_emergency(self, emergency, patient_counter, patients_dict, help_flag, helped_agent):
@@ -194,19 +201,16 @@ class Agent:
                         break
 
         for hospital in min_hospital:
-            with open('plots/out11_0.txt', 'a') as file:
-                print("+ 1", file=file)
-            possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital, []))
+            possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital, [], False))
 
         error = True
         for i in range(len(patients_per_hosp)):
-            if len(possible_ambulances[i]) < patients_per_hosp[i]:
+            while len(possible_ambulances[i]) < patients_per_hosp[i]:
                 if self.collaboration:
                     if error:
                         error = False
                         print("Agent", self.agent_id, "-Not enough zone vehicles to deal with emergency nº", emergency.get_eid(), "\n",
                               "Will contact nearest zone(s) to ask for help")
-
                     agent_help_vehicle = self.help_vehicle(emergency, self.other_agents)
                     if agent_help_vehicle is None:
                         print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
@@ -215,11 +219,12 @@ class Agent:
                         return
                     else:
                         for hospital in min_hospital:
-                            agent_help_vehicle.filter_medical_vehicles(emergency, hospital, possible_ambulances[i])
+                            agent_help_vehicle.filter_medical_vehicles(emergency, hospital, possible_ambulances[i], True)
                 else:
                     print("Not enough vehicles to handle full emergency.")
                     for hospital in min_hospital:
                         hospital.revert_capacity()
+                    break
 
         for i in range(len(patients_per_hosp)):
             for j in range(patients_per_hosp[i]):
@@ -240,6 +245,11 @@ class Agent:
                 for patient in patients_dict.values():
                     if patient.get_e_id() == emergency.get_eid() and patient.get_p_hospital() == min_hospital[i] and not patient.get_checked_in():
                         patient.set_admission_time()
+
+        for ambulances in possible_ambulances:
+            for ambulance in ambulances:
+                if ambulance.get_temp_help():
+                    ambulance.set_temp_help(False)
 
         if len(final_vehicles) == 1 and not help_flag:
             print("1 vehicle was allocated to deal with emergency nº", emergency.get_eid(), "\n")
