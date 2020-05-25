@@ -166,8 +166,8 @@ class MedicalVehicle:
                 time.sleep(0.0036)
 
             print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
-            with open('plots/hospitals/out1_2.txt', 'a') as f:
-                print('+ 1', file=f)
+            #  with open('plots/hospitals/out1_2.txt', 'a') as f:
+            #    print('+ 1', file=f)
 
             self.help_v = False
 

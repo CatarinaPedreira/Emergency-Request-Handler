@@ -59,8 +59,8 @@ def setup():
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time, 0)
 
-    with open('plots/hospitals/out1_2.txt', 'a') as file:
-        print(n_vehicles, file=file)
+    #with open('plots/hospitals/out1_2.txt', 'a') as file:
+    #    print(n_vehicles, file=file)
 
     n_columns = 0
 
@@ -126,7 +126,6 @@ def setup():
         list_agents = copy.deepcopy(agents)
         del list_agents[i]
         agents[i].set_other_agents(list_agents)
-
 
 # ----------------------------------------AUTOMATIC_EMERGENCY_CREATION--------------------------------------------------
 def create_emergency(e_id):
@@ -249,6 +248,10 @@ def perceive_emergencies():
             print("There aren't enough vehicles in entire the map! The emergency will not be responded.")
         if time.time() > start + PERIOD_OF_TIME:
             print("Finished")
+            with open('plots/agents/out8_2.txt', 'a') as file:
+                print(len(agents), file=file)
+            with open('plots/agents/out8_2.txt', 'a') as file:
+                print(emergency_id, file=file)
             break
 
 # --------------------------------------------CHECK_UPDATES-------------------------------------------------------------
