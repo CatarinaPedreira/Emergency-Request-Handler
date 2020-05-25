@@ -115,7 +115,7 @@ class Agent:
                 allocated_patients = patient_counter
             else:                           # when only some patients stay in the same hospital
                 allocated_patients = min_hospital.get_slots()
-            min_hospital.update_curr_capacity(allocated_patients)   # TODO can only update when vehicles arrive to emergency
+            min_hospital.update_curr_capacity(allocated_patients)
         else:
             allocated_patients = 0
 
