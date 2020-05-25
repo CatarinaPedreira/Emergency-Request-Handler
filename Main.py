@@ -186,6 +186,18 @@ def decide_frontier_agent(a_possibilities, emer):
     return agent
 
 
+def enough_vehicles_in_map(emer):
+    count = 0
+    for agent in agents:
+        for hospital in agent.hospitals:
+            for vehicle in hospital.get_medical_vehicles():
+                for type_v in emer.get_type_vehicle():
+                    if type_v == vehicle.get_type_vehicle():
+                        count += 1  # Every vehicle of that type in the map
+
+    return count >= emer.get_num_patients()
+
+
 def allocate_to_agent(emergency):
     global patients_dict
 
@@ -231,12 +243,17 @@ def perceive_emergencies():
                     emergency = create_emergency(emergency_id)
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
-        allocate_to_agent(emergency)
+        if enough_vehicles_in_map(emergency):
+            allocate_to_agent(emergency)
+        else:
+            print("There aren't enough vehicles in entire the map! The emergency will not be responded.")
         if time.time() > start + PERIOD_OF_TIME:
             print("Finished")
             break
 
 # --------------------------------------------CHECK_UPDATES-------------------------------------------------------------
+
+
 def global_check_and_update():
     global run, patients_dict
 
