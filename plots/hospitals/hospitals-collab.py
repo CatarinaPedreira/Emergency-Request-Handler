@@ -36,8 +36,8 @@ for i in range(len(y_list)):
 plt.plot(x_list, y_average, "ro-",)
 
 plt.xlabel('Number of hospitals per zone')
-plt.ylabel('Number of backup vehicles')
-plt.title('Collaboration between Hospitals')
+plt.ylabel('Collaborative Behaviour')
+plt.title('Collaboration between Zones')
 plt.grid(False)
 plt.savefig("hospitals-collab.png")
 plt.show()
