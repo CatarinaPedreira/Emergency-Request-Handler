@@ -169,6 +169,8 @@ class MedicalVehicle:
             with open('plots/out11_0.txt', 'a') as f:
                 print('+ 1', file=f)
 
+            self.help_v = False
+
         if self.status == 'Replenish':
             self.replenish()
             print(self.type_vehicle, "vehicle", self.id, "replenished fuel and medicine at the hospital")

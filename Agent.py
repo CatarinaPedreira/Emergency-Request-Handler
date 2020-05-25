@@ -46,7 +46,11 @@ class Agent:
         return min_agent
 
     def get_agent_from_hospital(self, hosp, agents):
-        for agent in agents:
+        for a_id in agents:
+            for a in self.other_agents:
+                if a_id == a.get_id():
+                    agent = a
+                    break
             for hospital in agent.hospitals:
                 if hosp == hospital:
                     return agent
@@ -54,18 +58,23 @@ class Agent:
     def help_vehicle(self, emergency, agents):
         min_distance = math.inf
         min_vehicle = None
-        for agent in agents:
-            if agent.get_id() != self.get_id():
-                for hospital in agent.get_hospitals():
-                    for vehicle in hospital.get_medical_vehicles():
-                        dist = agent.manhattan_distance(vehicle, emergency)
-                        if dist < min_distance:
-                            min_distance = dist
-                            min_vehicle = vehicle
+        for a_id in agents:
+            for a in self.other_agents:
+                if a_id == a.get_id():
+                    agent = a
+                    break
+            for hospital in agent.get_hospitals():
+                for vehicle in hospital.get_medical_vehicles():
+                    for type_v in emergency.get_type_vehicle():
+                        if type_v == vehicle.get_type_vehicle() and vehicle.get_status() == "Available":
+                            dist = agent.manhattan_distance(vehicle, emergency)
+                            if dist < min_distance:
+                                min_agent = agent
+                                min_distance = dist
+                                min_vehicle = vehicle
 
         if min_vehicle is not None:
-            agent = self.get_agent_from_hospital(min_vehicle.get_hospital_base(), agents)
-            return agent
+            return min_agent
         else:
             return None
 
@@ -132,7 +141,7 @@ class Agent:
                         min_distance = manhattan_dist
                         min_vehicle = possibility
 
-        if min_vehicle is not None:
+        if min_vehicle is not None and min_vehicle not in final_vehicles:
             available_ambulances.remove(min_vehicle)
             min_vehicle.change_status("Assigned")
             min_vehicle.set_em_location(emergency.get_location())
@@ -143,14 +152,14 @@ class Agent:
                 min_vehicle.set_help_v(help_flag)
             final_vehicles.append(min_vehicle)
             hosp_vehicles.append(min_vehicle)
-        elif self.collaboration:
-            agent = self.help_vehicle(emergency, self.other_agents)
+        elif self.collaboration and not help_flag:
+            agents_to_see = []
+            for a in self.other_agents:
+                agents_to_see.append(a.get_id())
+            agent = self.help_vehicle(emergency, agents_to_see)
             if agent is not None:
-                # print("Agent:", self.agent_id, "-All vehicles are unavailable or insufficient, emergency not completed!BU")
-                # return -1
-                possible_ambulances = []
-                agent.filter_medical_vehicles(emergency, min_hospital, possible_ambulances, True)
-                agent.calculate_possibilities(possible_ambulances, emergency, final_vehicles, min_hospital, True, hosp_vehicles)
+                agent.filter_medical_vehicles(emergency, min_hospital, available_ambulances, True)
+                agent.calculate_possibilities(available_ambulances, emergency, final_vehicles, min_hospital, True, hosp_vehicles)
             else:
                 return -1
 
@@ -205,26 +214,31 @@ class Agent:
 
         error = True
         for i in range(len(patients_per_hosp)):
+            agents_to_see = []
+            for a in self.other_agents:
+                agents_to_see.append(a.get_id())
             while len(possible_ambulances[i]) < patients_per_hosp[i]:
                 if self.collaboration:
                     if error:
                         error = False
                         print("Agent", self.agent_id, "-Not enough zone vehicles to deal with emergency nº", emergency.get_eid(), "\n",
                               "Will contact nearest zone(s) to ask for help")
-                    agent_help_vehicle = self.help_vehicle(emergency, self.other_agents)
+                    agent_help_vehicle = self.help_vehicle(emergency, agents_to_see)
                     if agent_help_vehicle is None:
                         print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
                         for hospital in min_hospital:
                             hospital.revert_capacity()
                         return
                     else:
+                        agents_to_see.remove(agent_help_vehicle.get_id())
                         for hospital in min_hospital:
                             agent_help_vehicle.filter_medical_vehicles(emergency, hospital, possible_ambulances[i], True)
+
                 else:
                     print("Not enough vehicles to handle full emergency.")
                     for hospital in min_hospital:
                         hospital.revert_capacity()
-                    break
+                    return
 
         for i in range(len(patients_per_hosp)):
             for j in range(patients_per_hosp[i]):
