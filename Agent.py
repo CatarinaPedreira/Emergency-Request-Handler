@@ -14,6 +14,7 @@ class Agent:
         self.area = area_border
         self.hospitals = hospitals
         self.other_agents = None
+        self.collaboration = False
 
     def manhattan_distance(self, a, b):
         return abs(a.get_location()[0] - b.get_location()[0]) + abs(a.get_location()[1] - b.get_location()[1])
@@ -137,7 +138,7 @@ class Agent:
             min_vehicle.set_help_v(help_flag)
             final_vehicles.append(min_vehicle)
             hosp_vehicles.append(min_vehicle)
-        else:
+        elif self.collaboration:
             agent = self.help_vehicle(emergency, self.other_agents)
             if agent is None:
                 print("Agent:", self.agent_id, "-All vehicles are unavailable or insufficient, emergency not completed!BU")
@@ -158,18 +159,25 @@ class Agent:
         while patients_left > 0:
             result = self.check_closest_hospital(emergency, patients_left)
             if result[0] is None:
-                if first:
-                    first = False
-                    print("Agent", self.agent_id, "-All zone hospitals are incapable of allocating all patients to attend.\n"
-                                                  "Will contact nearest zone(s) to ask for help")
-                agent_help_hospital = self.help_hospital(emergency, self.other_agents)
-                if agent_help_hospital is None:
-                    print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")
+                if self.collaboration:
+                    if first:
+                        first = False
+                        print("Agent", self.agent_id, "-All zone hospitals are incapable of allocating all patients to attend.\n"
+                                                      "Will contact nearest zone(s) to ask for help")
+                    agent_help_hospital = self.help_hospital(emergency, self.other_agents)
+                    if agent_help_hospital is None:
+                        print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")
+                        for hospital in min_hospital:
+                            hospital.revert_capacity()
+                        return
+                    else:
+                        result = agent_help_hospital.check_closest_hospital(emergency, patients_left)
+
+                else:
+                    print("No free hospitals!")
                     for hospital in min_hospital:
                         hospital.revert_capacity()
                     return
-                else:
-                    result = agent_help_hospital.check_closest_hospital(emergency, patients_left)
 
             min_hospital.append(result[0])
             allocated_patients = result[1]
@@ -184,25 +192,32 @@ class Agent:
                         break
 
         for hospital in min_hospital:
+            with open('plots/out11_0.txt', 'a') as file:
+                print("+ 1", file=file)
             possible_ambulances.append(self.filter_medical_vehicles(emergency, hospital, []))
 
         error = True
         for i in range(len(patients_per_hosp)):
             if len(possible_ambulances[i]) < patients_per_hosp[i]:
-                if error:
-                    error = False
-                    print("Agent", self.agent_id, "-Not enough zone vehicles to deal with emergency nº", emergency.get_eid(), "\n",
-                          "Will contact nearest zone(s) to ask for help")
+                if self.collaboration:
+                    if error:
+                        error = False
+                        print("Agent", self.agent_id, "-Not enough zone vehicles to deal with emergency nº", emergency.get_eid(), "\n",
+                              "Will contact nearest zone(s) to ask for help")
 
-                agent_help_vehicle = self.help_vehicle(emergency, self.other_agents)
-                if agent_help_vehicle is None:
-                    print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
+                    agent_help_vehicle = self.help_vehicle(emergency, self.other_agents)
+                    if agent_help_vehicle is None:
+                        print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
+                        for hospital in min_hospital:
+                            hospital.revert_capacity()
+                        return
+                    else:
+                        for hospital in min_hospital:
+                            agent_help_vehicle.filter_medical_vehicles(emergency, hospital, possible_ambulances[i])
+                else:
+                    print("Not enough vehicles to handle full emergency.")
                     for hospital in min_hospital:
                         hospital.revert_capacity()
-                    return
-                else:
-                    for hospital in min_hospital:
-                        agent_help_vehicle.filter_medical_vehicles(emergency, hospital, possible_ambulances[i])
 
         for i in range(len(patients_per_hosp)):
             for j in range(patients_per_hosp[i]):
