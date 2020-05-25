@@ -14,9 +14,6 @@ from MedicalVehicle import MedicalVehicle
 from Hospital import Hospital
 from Patient import Patient
 
-start = time.time()
-PERIOD_OF_TIME = 180
-
 zones = []
 agents = []
 hospital_groups = []
@@ -123,6 +120,7 @@ def setup():
         list_agents = copy.deepcopy(agents)
         del list_agents[i]
         agents[i].set_other_agents(list_agents)
+
 
 # ----------------------------------------AUTOMATIC_EMERGENCY_CREATION--------------------------------------------------
 def create_emergency(e_id):
@@ -243,9 +241,6 @@ def perceive_emergencies():
             allocate_to_agent(emergency)
         else:
             print("There aren't enough vehicles in entire the map! The emergency will not be responded.")
-        if time.time() > start + PERIOD_OF_TIME:
-            print("Finished")
-            break
 
 # --------------------------------------------CHECK_UPDATES-------------------------------------------------------------
 
