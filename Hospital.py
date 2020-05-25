@@ -4,7 +4,7 @@ class Hospital:
         self.h_id = h_id
         self.location = ()
         self.controlTower = None
-        self.maxCapacity = 2   # TODO change to 100 later
+        self.maxCapacity = 100  # TODO change to 100 later
         self.currCapacity = self.oldCapacity = 0
         self.medicalVehicles = []
 

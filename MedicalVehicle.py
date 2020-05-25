@@ -159,6 +159,8 @@ class MedicalVehicle:
                 time.sleep(0.0036)
 
             print(self.type_vehicle, "vehicle", self.id, "provided backup for zone with emergency nº", eid, " and will now return to its base hospital")
+            with open('plots/out3_11.txt', 'a') as f:
+                print('+ 1', file=f)
 
         if self.status == 'Replenish':
             self.replenish()

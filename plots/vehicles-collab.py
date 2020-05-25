@@ -9,7 +9,7 @@ index_counter = 0
 
 for i in range(3, 12, 2):  # for loop parameters may differ according to what we are testing
 	y_list += [],
-	for j in range(15):  # 15 is the number of runs
+	for j in range(11):  # 11 is the number of runs
 		counter = 0
 		f = open('out' + str(i) + '_' + str(j) + '.txt', 'r')
 		for line in f.readlines():
@@ -19,7 +19,7 @@ for i in range(3, 12, 2):  # for loop parameters may differ according to what we
 				counter += int(line.strip().split("+ ")[1])  # number of vehicles lent during collaboration
 		y_list[index_counter].append(counter)
 		f.close()
-		os.remove('out' + str(i) + '_' + str(j) + '.txt')
+		#  os.remove('out' + str(i) + '_' + str(j) + '.txt')
 	x_list.append(n_vehicles)
 	index_counter += 1
 

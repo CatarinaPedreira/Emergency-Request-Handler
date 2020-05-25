@@ -14,6 +14,9 @@ from MedicalVehicle import MedicalVehicle
 from Hospital import Hospital
 from Patient import Patient
 
+start = time.time()
+PERIOD_OF_TIME = 60
+
 zones = []
 agents = []
 hospital_groups = []
@@ -47,7 +50,7 @@ def setup():
 
     print("-------------------Medical Emergencies Dispatcher System-------------------")
     n_agents = input("Number of Control Towers: ")
-    n_agents = sanitize_integer_input(n_agents, 1)
+    n_agents = sanitize_integer_input(n_agents, 2)
     n_hospitals = input("Number of Hospitals per zone: ")
     n_hospitals = sanitize_integer_input(n_hospitals, 1)
     n_vehicles = input("Number of Medical Vehicles per hospital (minimum 3): ")
@@ -56,8 +59,7 @@ def setup():
         cycle_time = input("Frequency of Medical Emergencies (in seconds): ")
         cycle_time = sanitize_integer_input(cycle_time, 0)
 
-    # TODO beware of file name !!! same in Agent.py
-    with open('out.txt', 'a') as file:
+    with open('plots/out3_11.txt', 'a') as file:
         print(n_vehicles, file=file)
 
     n_columns = 0
@@ -180,7 +182,7 @@ def decide_frontier_agent(a_possibilities, emer):
                     min_distance = dist
                     min_vehicle = vehicle
 
-    agent = get_agent_from_hospital(min_vehicle.get_current_hospital())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
+    agent = get_agent_from_hospital(min_vehicle.get_hospital_base())   # Curr hospital because with collaboration this vehicle may not be within its initial zone
     return agent
 
 
@@ -230,7 +232,9 @@ def perceive_emergencies():
         print("-------------------------------New Emergency-------------------------------")
         print(emergency)
         allocate_to_agent(emergency)
-
+        if time.time() > start + PERIOD_OF_TIME:
+            print("Finished")
+            break
 
 # --------------------------------------------CHECK_UPDATES-------------------------------------------------------------
 def global_check_and_update():
