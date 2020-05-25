@@ -115,7 +115,7 @@ class Agent:
                 allocated_patients = patient_counter
             else:                           # when only some patients stay in the same hospital
                 allocated_patients = min_hospital.get_slots()
-            min_hospital.update_curr_capacity(allocated_patients)   # TODO can only update when vehicles arrive to emergency
+            min_hospital.update_curr_capacity(allocated_patients)
         else:
             allocated_patients = 0
 
@@ -180,8 +180,8 @@ class Agent:
                         first = False
                         print("Agent", self.agent_id, "-All zone hospitals are incapable of allocating all patients to attend.\n"
                                                       "Will contact nearest zone(s) to ask for help")
-                        with open('plots/hospitals/out1_2.txt', 'a') as f:
-                            print('+ 1', file=f)
+                        #  with open('plots/hospitals/out1_2.txt', 'a') as f:
+                        #    print('+ 1', file=f)
                     agent_help_hospital = self.help_hospital(emergency, self.other_agents)
                     if agent_help_hospital is None:
                         print("Agent", self.agent_id, "-Error: All hospitals are full or don't have capacity for number of pacientes, emergency failed!")

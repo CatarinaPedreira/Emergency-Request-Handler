@@ -31,7 +31,7 @@ class Patient:
         return self.checked_in
 
     def set_admission_time(self):
-        self.admission_time = random.randint(self.gravity, self.gravity + 10)
+        self.admission_time = random.randint(self.gravity * 4, self.gravity * 4 + 10)
         self.checked_in = 1
 
     def check_admission_time(self):
