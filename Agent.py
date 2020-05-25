@@ -244,6 +244,7 @@ class Agent:
             for j in range(patients_per_hosp[i]):
                 output = self.calculate_possibilities(possible_ambulances[i], emergency, final_vehicles, min_hospital[i], help_flag, hosp_vehicles)
                 if output == -1:
+                    print("Agent", self.agent_id, "-Error: All vehicles are unavailable or insufficient, emergency not completed!")
                     return
             if patients_per_hosp[i] > len(hosp_vehicles):
                 number_patients = len(hosp_vehicles)
