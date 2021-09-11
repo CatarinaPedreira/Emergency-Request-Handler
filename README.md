@@ -1,5 +1,5 @@
-# AASMAProj
-AASMA Project - Effectively responding to emergency requests
+# Emergency Request Handler
+Using rational agents to effectively respond to emergency requests.
 
 **To run:**
 
